@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>SARASWATI — Royal Gold</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,450;9..144,560;9..144,650&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0E0E0C;
+    --surface:#151411;
+    --card:#1A1815;
+    --sidebar:#12110F;
+
+    --gold:#D4AF37;
+    --gold-hover:#E5C357;
+    --gold-dark:#B8891F;
+    --gold-light:#F1D67A;
+    --champagne:#E6C76B;
+
+    --border:#2F291E;
+    --divider:#3A3221;
+
+    --heading:#F7F2E8;
+    --body:#D8D3C8;
+    --text-secondary:#A39B8C;
+    --disabled:#69645A;
+
+    --success:#5EA96B;
+    --warning:#C68A2A;
+    --error:#B54747;
+    --info:#4F89C7;
+
+    --radius-lg:18px;
+    --radius-md:13px;
+    --radius-sm:9px;
+    --shadow-card: 0 8px 28px -10px rgba(0,0,0,0.55);
+    --shadow-gold: 0 6px 20px -6px rgba(212,175,55,0.35);
+  }
+  *{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--body);
+    font-family:'Manrope', -apple-system, sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+  ::selection{ background:rgba(212,175,55,0.3); }
+  ::-webkit-scrollbar{ width:8px; height:8px; }
+  ::-webkit-scrollbar-thumb{ background:#2a2620; border-radius:8px; }
+  ::-webkit-scrollbar-thumb:hover{ background:#3a3428; }
+  ::-webkit-scrollbar-track{ background:transparent; }
+  .serif{ font-family:'Fraunces', serif; }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+  svg{ display:block; }
+  button{ font-family:inherit; }
+
+  /* ============ APP SHELL ============ */
+  .app{
+    display:grid;
+    grid-template-columns: 264px 1fr 0px;
+    height:100vh; width:100vw;
+    transition:grid-template-columns .32s cubic-bezier(.4,0,.2,1);
+  }
+  .app.workspace-mode{ grid-template-columns: 264px 1fr 348px; }
+
+  /* ============ SIDEBAR ============ */
+  .sidebar{
+    background:var(--sidebar);
+    border-right:1px solid var(--border);
+    display:flex; flex-direction:column;
+    padding:22px 14px 16px;
+    min-width:0;
+  }
+  .brand-row{ display:flex; align-items:center; gap:11px; padding:2px 8px 20px; }
+  .brand-mark{
+    width:38px; height:38px; border-radius:11px; flex-shrink:0;
+    background:linear-gradient(155deg, #1c1a14, #100f0c);
+    border:1px solid var(--divider);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:inset 0 0 0 1px rgba(212,175,55,0.08);
+  }
+  .brand-text{ min-width:0; }
+  .brand-name{
+    font-family:'Fraunces', serif; font-weight:600; font-size:16.5px;
+    letter-spacing:0.5px; color:var(--heading); line-height:1.15;
+  }
+  .brand-tag{ font-size:9.5px; letter-spacing:0.6px; color:var(--text-secondary); margin-top:2px; }
+
+  .nav-group{ display:flex; flex-direction:column; gap:2px; margin-bottom:6px; }
+  .nav-item{
+    display:flex; align-items:center; gap:11px;
+    padding:9px 12px; border-radius:10px;
+    font-size:13.3px; font-weight:500; color:var(--body);
+    cursor:pointer; position:relative;
+    transition:background .15s ease, color .15s ease;
+  }
+  .nav-item svg{ opacity:.8; flex-shrink:0; }
+  .nav-item:hover{ background:rgba(212,175,55,0.06); color:var(--heading); }
+  .nav-item.active{
+    background:linear-gradient(90deg, rgba(212,175,55,0.16), rgba(212,175,55,0.03));
+    color:var(--gold-light);
+  }
+  .nav-item.active svg{ opacity:1; stroke:var(--gold-light); }
+  .nav-item .badge{
+    margin-left:auto; font-size:10.5px; font-family:'JetBrains Mono',monospace;
+    color:var(--text-secondary); background:rgba(255,255,255,0.04);
+    border:1px solid var(--border); border-radius:20px; padding:1px 7px;
+  }
+  .nav-item.active .badge{ color:var(--gold-light); border-color:rgba(212,175,55,0.3); background:rgba(212,175,55,0.1); }
+
+  .nav-divider{ height:1px; background:var(--divider); margin:12px 4px; opacity:.6; }
+
+  .sidebar-spacer{ flex:1; }
+
+  .sidebar-bottom{ display:flex; flex-direction:column; gap:12px; }
+  .storage-block{ padding:2px 12px 6px; }
+  .storage-text{ font-size:10.8px; color:var(--text-secondary); margin-bottom:6px; }
+  .storage-bar{ height:5px; border-radius:6px; background:rgba(255,255,255,0.05); overflow:hidden; }
+  .storage-fill{ height:100%; width:24%; border-radius:6px; background:linear-gradient(90deg, var(--gold-dark), var(--gold)); }
+
+  .profile-row{
+    display:flex; align-items:center; gap:10px;
+    padding:9px 10px; border-radius:12px;
+    border:1px solid var(--border); background:var(--surface);
+    cursor:pointer;
+  }
+  .profile-row:hover{ border-color:var(--divider); }
+  .profile-avatar{
+    width:32px; height:32px; border-radius:9px; flex-shrink:0;
+    background:linear-gradient(155deg, var(--gold-light), var(--gold) 60%, var(--gold-dark));
+    display:flex; align-items:center; justify-content:center;
+    font-size:12.5px; font-weight:800; color:#241a06;
+  }
+  .profile-name{ font-size:12.5px; font-weight:700; color:var(--heading); line-height:1.2; }
+  .profile-sub{ font-size:10.5px; color:var(--text-secondary); }
+  .profile-chevron{ margin-left:auto; color:var(--text-secondary); }
+
+  /* ============ MAIN ============ */
+  .main{ display:flex; flex-direction:column; min-width:0; position:relative; }
+
+  .main-header{
+    display:flex; align-items:center; gap:16px;
+    padding:22px 28px 18px;
+    flex-shrink:0;
+  }
+  .main-title{ font-family:'Fraunces', serif; font-size:23px; font-weight:560; color:var(--heading); margin-right:auto; }
+  .search-bar{
+    display:flex; align-items:center; gap:9px;
+    width:340px; max-width:36vw; height:40px; padding:0 14px;
+    border-radius:11px; background:var(--surface); border:1px solid var(--border);
+    color:var(--text-secondary);
+    transition:border-color .15s ease;
+  }
+  .search-bar:hover{ border-color:var(--divider); }
+  .search-bar input{ all:unset; flex:1; font-size:13px; color:var(--body); }
+  .search-bar input::placeholder{ color:var(--disabled); }
+  .search-kbd{
+    font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--text-secondary);
+    background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:5px; padding:2px 6px;
+  }
+  .btn-gold{
+    display:flex; align-items:center; gap:7px; height:40px; padding:0 16px;
+    border-radius:11px; border:none; cursor:pointer;
+    background:linear-gradient(155deg, var(--gold-hover), var(--gold));
+    color:#26190a; font-size:13px; font-weight:800;
+    box-shadow:var(--shadow-gold);
+    transition:filter .15s ease, transform .15s ease;
+  }
+  .btn-gold:hover{ filter:brightness(1.06); transform:translateY(-1px); }
+  .btn-ghost-gold{
+    display:flex; align-items:center; gap:7px; height:38px; padding:0 14px;
+    border-radius:11px; border:1px solid rgba(212,175,55,0.35); cursor:pointer;
+    background:rgba(212,175,55,0.06); color:var(--gold-light); font-size:12.8px; font-weight:700;
+  }
+  .btn-ghost-gold:hover{ background:rgba(212,175,55,0.12); }
+
+  .main-scroll{ flex:1; overflow-y:auto; padding:4px 28px 28px; }
+
+  /* ---- folder rows (Home) ---- */
+  .folder-list{ display:flex; flex-direction:column; gap:10px; }
+  .folder-row{
+    display:flex; align-items:center; gap:16px;
+    padding:15px 18px; border-radius:var(--radius-md);
+    background:var(--card); border:1px solid var(--border);
+    cursor:pointer;
+    transition:border-color .15s ease, background .15s ease, transform .15s ease;
+  }
+  .folder-row:hover{
+    border-color:rgba(212,175,55,0.4);
+    background:linear-gradient(90deg, rgba(212,175,55,0.05), var(--card) 30%);
+    transform:translateX(2px);
+  }
+  .folder-icon{
+    width:44px; height:44px; border-radius:12px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:var(--shadow-card);
+  }
+  .folder-info{ min-width:0; flex:1; }
+  .folder-name{ font-size:14.5px; font-weight:700; color:var(--heading); margin-bottom:3px; }
+  .folder-meta{ font-size:11.5px; color:var(--text-secondary); display:flex; align-items:center; gap:6px; }
+  .folder-meta .dot{ width:3px; height:3px; border-radius:50%; background:var(--disabled); }
+  .folder-progress{ width:120px; flex-shrink:0; display:flex; flex-direction:column; gap:5px; }
+  .folder-progress .bar{ height:4px; border-radius:6px; background:rgba(255,255,255,0.05); overflow:hidden; }
+  .folder-progress .fill{ height:100%; border-radius:6px; }
+  .folder-progress .label{ font-size:9.8px; color:var(--disabled); font-family:'JetBrains Mono',monospace; }
+  .folder-menu{
+    width:32px; height:32px; border-radius:9px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    color:var(--text-secondary);
+  }
+  .folder-menu:hover{ background:rgba(255,255,255,0.05); color:var(--heading); }
+
+  .new-subject-row{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    padding:15px; border-radius:var(--radius-md);
+    border:1.5px dashed var(--divider);
+    color:var(--text-secondary); font-size:13px; font-weight:600;
+    cursor:pointer; margin-top:2px;
+  }
+  .new-subject-row:hover{ border-color:var(--gold-dark); color:var(--gold-light); background:rgba(212,175,55,0.03); }
+
+  /* ---- empty state (Recent) ---- */
+  .empty-state{
+    height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; gap:22px; padding:20px;
+  }
+  .empty-illustration{ width:230px; height:200px; }
+  .empty-heading{ font-family:'Fraunces', serif; font-size:22px; font-weight:560; color:var(--heading); max-width:380px; }
+  .empty-sub{ font-size:13.3px; color:var(--text-secondary); max-width:380px; line-height:1.7; margin-top:-10px; }
+
+  /* ============ FLOATING ASK BUTTON ============ */
+  .ask-float{
+    position:absolute; right:28px; bottom:26px;
+    display:flex; align-items:center; gap:9px;
+    padding:0 20px; height:46px; border-radius:14px; border:none; cursor:pointer;
+    background:linear-gradient(155deg, var(--gold-hover), var(--gold) 55%, var(--gold-dark));
+    color:#26190a; font-size:13.5px; font-weight:800;
+    box-shadow:0 10px 30px -8px rgba(212,175,55,0.5);
+    z-index:5;
+  }
+  .ask-float:hover{ filter:brightness(1.05); }
+
+  /* ============ DOC TABS + TOOLBAR (workspace mode) ============ */
+  .doc-tabs{ display:none; align-items:center; gap:4px; padding:14px 24px 0; border-bottom:1px solid var(--border); }
+  .app.workspace-mode .doc-tabs{ display:flex; }
+  .doc-tab{
+    display:flex; align-items:center; gap:8px; padding:9px 15px;
+    border-radius:10px 10px 0 0; font-size:12.6px; color:var(--text-secondary);
+    cursor:pointer; border:1px solid transparent; border-bottom:none; max-width:200px;
+  }
+  .doc-tab span{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .doc-tab.active{ color:var(--heading); background:var(--card); border-color:var(--border); }
+  .doc-tab-close{ margin-left:2px; opacity:.5; }
+  .back-btn{
+    display:flex; align-items:center; gap:6px; font-size:12.3px; color:var(--text-secondary);
+    padding:8px 6px; cursor:pointer; flex-shrink:0;
+  }
+  .back-btn:hover{ color:var(--gold-light); }
+
+  .doc-toolbar{ display:none; align-items:center; gap:14px; padding:12px 24px; border-bottom:1px solid var(--border); background:var(--surface); }
+  .app.workspace-mode .doc-toolbar{ display:flex; }
+  .doc-title-block{ margin-right:auto; min-width:0; }
+  .doc-title{ font-family:'Fraunces', serif; font-size:15px; font-weight:500; color:var(--heading); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .doc-meta{ font-size:10.8px; color:var(--text-secondary); margin-top:2px; }
+  .tool-group{ display:flex; align-items:center; gap:2px; padding:3px; border-radius:10px; background:var(--card); border:1px solid var(--border); }
+  .tool-btn{ width:29px; height:27px; border-radius:7px; display:flex; align-items:center; justify-content:center; color:var(--text-secondary); cursor:pointer; }
+  .tool-btn:hover{ background:rgba(255,255,255,0.05); color:var(--heading); }
+  .tool-btn.active{ background:rgba(212,175,55,0.16); color:var(--gold-light); }
+  .zoom-label{ font-size:11px; color:var(--text-secondary); padding:0 6px; font-family:'JetBrains Mono',monospace; }
+
+  .viewer-shell{ display:none; flex:1; overflow-y:auto; padding:26px 20px 40px; flex-direction:column; align-items:center; gap:18px; }
+  .app.workspace-mode .viewer-shell{ display:flex; }
+  .app.workspace-mode .home-shell{ display:none; }
+  .page{
+    width:620px; max-width:100%; border-radius:6px; padding:50px 54px; position:relative;
+    background:linear-gradient(180deg, #f7f1e2, #f0e8d3); color:#3a3226;
+    box-shadow:0 20px 50px -18px rgba(0,0,0,0.65);
+  }
+  .page .kicker{ font-size:10.3px; letter-spacing:1.4px; text-transform:uppercase; color:var(--gold-dark); font-weight:700; margin-bottom:9px; }
+  .page h3{ font-family:'Fraunces', serif; font-size:19px; font-weight:560; margin:0 0 12px; color:#2a2419; }
+  .page p{ font-size:12.6px; line-height:1.85; color:#4b4335; margin:0 0 12px; }
+  .hl{ background:rgba(212,175,55,0.35); padding:1px 2px; border-radius:3px; }
+  .hl-teal{ background:rgba(79,137,199,0.22); padding:1px 2px; border-radius:3px; }
+  .eq-block{ margin:16px 0; padding:13px 16px; border-radius:8px; background:rgba(58,50,38,0.05); border:1px solid rgba(58,50,38,0.1); font-family:'JetBrains Mono',monospace; font-size:12.5px; text-align:center; }
+  .page-num{ position:absolute; bottom:14px; right:22px; font-family:'JetBrains Mono',monospace; font-size:10px; color:#a99a7a; }
+
+  /* ============ CHAT PANEL ============ */
+  .chat{ border-left:1px solid var(--border); background:var(--sidebar); display:flex; flex-direction:column; min-width:0; overflow:hidden; }
+  .chat-head{ padding:16px 17px 12px; border-bottom:1px solid var(--border); display:flex; flex-direction:column; gap:9px; flex-shrink:0; }
+  .chat-head-top{ display:flex; align-items:center; justify-content:space-between; }
+  .chat-title{ display:flex; align-items:center; gap:8px; font-size:13.3px; font-weight:700; color:var(--heading); }
+  .chat-title .pulse{ width:7px; height:7px; border-radius:50%; background:var(--gold); box-shadow:0 0 0 3px rgba(212,175,55,0.18); }
+  .scope-row{ display:flex; gap:6px; flex-wrap:wrap; }
+  .scope-chip{ font-size:10.6px; padding:4px 9px; border-radius:20px; border:1px solid var(--border); color:var(--text-secondary); cursor:pointer; }
+  .scope-chip.active{ background:rgba(212,175,55,0.14); border-color:rgba(212,175,55,0.4); color:var(--gold-light); }
+
+  .chat-scroll{ flex:1; overflow-y:auto; padding:16px 15px 8px; display:flex; flex-direction:column; gap:15px; }
+  .msg{ display:flex; gap:9px; }
+  .msg-avatar{ width:25px; height:25px; border-radius:7px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:10.5px; font-weight:800; }
+  .msg.user .msg-avatar{ background:rgba(79,137,199,0.18); color:#8fbde6; }
+  .msg.ai .msg-avatar{ background:linear-gradient(155deg, var(--gold-light), var(--gold)); color:#26190a; }
+  .msg-body{ display:flex; flex-direction:column; gap:8px; min-width:0; }
+  .msg-bubble{ font-size:12.7px; line-height:1.65; color:var(--body); background:var(--card); border:1px solid var(--border); padding:10px 12px; border-radius:12px; }
+  .msg.user .msg-bubble{ background:rgba(79,137,199,0.07); border-color:rgba(79,137,199,0.2); }
+  .citations{ display:flex; flex-direction:column; gap:6px; }
+  .citation{ display:flex; gap:8px; font-size:11px; padding:8px 10px; border-radius:9px; background:rgba(212,175,55,0.05); border:1px solid rgba(212,175,55,0.22); border-left:2px solid var(--gold); cursor:pointer; }
+  .citation:hover{ background:rgba(212,175,55,0.1); }
+  .citation .cnum{ font-family:'JetBrains Mono',monospace; color:var(--gold-light); font-weight:700; flex-shrink:0; }
+  .citation .csrc{ display:block; margin-top:2px; color:var(--text-secondary); font-size:10px; font-family:'JetBrains Mono',monospace; }
+
+  .chat-input-wrap{ padding:12px 13px 15px; border-top:1px solid var(--border); flex-shrink:0; }
+  .chat-input{ display:flex; flex-direction:column; gap:8px; border-radius:14px; border:1px solid var(--border); background:var(--card); padding:10px 12px; }
+  .chat-input textarea{ all:unset; width:100%; font-size:12.7px; color:var(--body); resize:none; min-height:18px; max-height:60px; }
+  .chat-input textarea::placeholder{ color:var(--disabled); }
+  .chat-input-row{ display:flex; align-items:center; justify-content:flex-end; }
+  .send-btn{ width:29px; height:29px; border-radius:9px; background:linear-gradient(155deg, var(--gold-light), var(--gold)); display:flex; align-items:center; justify-content:center; color:#26190a; cursor:pointer; border:none; }
+
+  a{ color:inherit; text-decoration:none; }
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <!-- ============ SIDEBAR ============ -->
+  <div class="sidebar">
+    <div class="brand-row">
+      <div class="brand-mark">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M12 3C9 5 6.5 8 6.5 12.5C6.5 16 9 18.5 12 20C15 18.5 17.5 16 17.5 12.5C17.5 8 15 5 12 3Z" stroke="url(#g1)" stroke-width="1.3"/>
+          <path d="M12 3v17" stroke="url(#g1)" stroke-width="0.8" opacity="0.6"/>
+          <circle cx="12" cy="12.4" r="1.6" fill="url(#g1)"/>
+          <defs><linearGradient id="g1" x1="6" y1="3" x2="18" y2="20"><stop stop-color="#F1D67A"/><stop offset="1" stop-color="#B8891F"/></linearGradient></defs>
+        </svg>
+      </div>
+      <div class="brand-text">
+        <div class="brand-name">SARASWATI</div>
+        <div class="brand-tag">YOUR NOTES · YOUR KNOWLEDGE · YOUR AI</div>
+      </div>
+    </div>
+
+    <div class="nav-group">
+      <div class="nav-item active" data-view="home">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>
+        Home
+      </div>
+      <div class="nav-item" data-view="home">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+        Subjects <span class="badge">6</span>
+      </div>
+      <div class="nav-item" data-view="recent">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        Recent
+      </div>
+      <div class="nav-item" data-view="recent">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.7 6.8L22 11l-5.5 4.8L18 22l-6-3.7L6 22l1.5-6.2L2 11l7.3-1.2z"/></svg>
+        Favorites
+      </div>
+      <div class="nav-item" data-view="recent">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>
+        Trash
+      </div>
+    </div>
+
+    <div class="nav-divider"></div>
+    <div class="sidebar-spacer"></div>
+
+    <div class="nav-group">
+      <div class="nav-item" data-view="home">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9c.24.44.62.79 1.09.95H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Settings
+      </div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="storage-block">
+        <div class="storage-text">1.2 GB of 5 GB used</div>
+        <div class="storage-bar"><div class="storage-fill"></div></div>
+      </div>
+      <div class="profile-row">
+        <div class="profile-avatar">M</div>
+        <div>
+          <div class="profile-name">Mayank</div>
+          <div class="profile-sub">B.Tech · Final Year</div>
+        </div>
+        <svg class="profile-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+
+    <!-- HOME SHELL -->
+    <div class="home-shell" id="homeShell">
+      <div class="main-header">
+        <div class="main-title" id="viewTitle">Home</div>
+        <div class="search-bar">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input type="text" placeholder="Search your workspace..." />
+          <span class="search-kbd">⌘K</span>
+        </div>
+        <button class="btn-gold">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#26190a" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+          New Folder
+        </button>
+      </div>
+
+      <div class="main-scroll">
+        <!-- HOME VIEW: folder grid -->
+        <div class="folder-list" id="folderView">
+          <div class="folder-row" data-doc="dbms">
+            <div class="folder-icon" style="background:linear-gradient(155deg,#F1D67A,#B8891F);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#26190a" stroke-width="1.8"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+            </div>
+            <div class="folder-info">
+              <div class="folder-name">DBMS</div>
+              <div class="folder-meta">3 files <span class="dot"></span> updated 5 days ago</div>
+            </div>
+            <div class="folder-progress">
+              <div class="bar"><div class="fill" style="width:60%; background:var(--gold);"></div></div>
+              <div class="label">Unit 3 of 5</div>
+            </div>
+            <div class="folder-menu">⋯</div>
+          </div>
+
+          <div class="folder-row" data-doc="networks">
+            <div class="folder-icon" style="background:linear-gradient(155deg,#8fce9c,#5EA96B);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0e2313" stroke-width="1.8"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+            </div>
+            <div class="folder-info">
+              <div class="folder-name">Computer Networks</div>
+              <div class="folder-meta">2 files <span class="dot"></span> updated 3 days ago</div>
+            </div>
+            <div class="folder-progress">
+              <div class="bar"><div class="fill" style="width:35%; background:var(--success);"></div></div>
+              <div class="label">Unit 2 of 6</div>
+            </div>
+            <div class="folder-menu">⋯</div>
+          </div>
+
+          <div class="folder-row" data-doc="ml">
+            <div class="folder-icon" style="background:linear-gradient(155deg,#8fbde6,#4F89C7);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0d1c2b" stroke-width="1.8"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+            </div>
+            <div class="folder-info">
+              <div class="folder-name">Machine Learning</div>
+              <div class="folder-meta">3 files <span class="dot"></span> updated 6 days ago</div>
+            </div>
+            <div class="folder-progress">
+              <div class="bar"><div class="fill" style="width:80%; background:var(--info);"></div></div>
+              <div class="label">Unit 4 of 5</div>
+            </div>
+            <div class="folder-menu">⋯</div>
+          </div>
+
+          <div class="folder-row" data-doc="os">
+            <div class="folder-icon" style="background:linear-gradient(155deg,#e0ae63,#C68A2A);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2b1c08" stroke-width="1.8"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+            </div>
+            <div class="folder-info">
+              <div class="folder-name">Operating Systems</div>
+              <div class="folder-meta">2 files <span class="dot"></span> updated 1 week ago</div>
+            </div>
+            <div class="folder-progress">
+              <div class="bar"><div class="fill" style="width:50%; background:var(--warning);"></div></div>
+              <div class="label">Unit 3 of 6</div>
+            </div>
+            <div class="folder-menu">⋯</div>
+          </div>
+
+          <div class="folder-row" data-doc="notes">
+            <div class="folder-icon" style="background:linear-gradient(155deg,#7fd6e0,#3a97a6);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0a2226" stroke-width="1.8"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+            </div>
+            <div class="folder-info">
+              <div class="folder-name">Semester Notes</div>
+              <div class="folder-meta">1 file <span class="dot"></span> updated 2 weeks ago</div>
+            </div>
+            <div class="folder-progress">
+              <div class="bar"><div class="fill" style="width:100%; background:#3a97a6;"></div></div>
+              <div class="label">Complete</div>
+            </div>
+            <div class="folder-menu">⋯</div>
+          </div>
+
+          <div class="folder-row" data-doc="thermo">
+            <div class="folder-icon" style="background:linear-gradient(155deg,#c9a6e0,#8a6bd6);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1c1230" stroke-width="1.8"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+            </div>
+            <div class="folder-info">
+              <div class="folder-name">Thermodynamics</div>
+              <div class="folder-meta">4 files <span class="dot"></span> updated yesterday</div>
+            </div>
+            <div class="folder-progress">
+              <div class="bar"><div class="fill" style="width:70%; background:#8a6bd6;"></div></div>
+              <div class="label">Unit 4 of 6</div>
+            </div>
+            <div class="folder-menu">⋯</div>
+          </div>
+
+          <div class="new-subject-row">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 5v14M5 12h14"/></svg>
+            New Subject
+          </div>
+        </div>
+
+        <!-- RECENT VIEW: empty state -->
+        <div class="empty-state" id="emptyView" style="display:none;">
+          <svg class="empty-illustration" viewBox="0 0 240 210" fill="none">
+            <defs>
+              <radialGradient id="glow" cx="50%" cy="42%" r="55%">
+                <stop offset="0%" stop-color="#D4AF37" stop-opacity="0.35"/>
+                <stop offset="100%" stop-color="#D4AF37" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="lotusG" x1="60" y1="40" x2="180" y2="110">
+                <stop stop-color="#F1D67A"/><stop offset="1" stop-color="#B8891F"/>
+              </linearGradient>
+            </defs>
+            <circle cx="120" cy="90" r="88" fill="url(#glow)"/>
+            <g opacity="0.85">
+              <path d="M70 60 Q120 20 170 60" stroke="url(#lotusG)" stroke-width="1.2" fill="none"/>
+              <path d="M120 30v34" stroke="url(#lotusG)" stroke-width="1" opacity="0.6"/>
+              <path d="M96 44 Q120 30 144 44" stroke="url(#lotusG)" stroke-width="1" fill="none" opacity="0.7"/>
+              <circle cx="120" cy="58" r="3.5" fill="url(#lotusG)"/>
+            </g>
+            <g>
+              <path d="M45 118 Q120 100 195 118 L195 132 Q120 116 45 132 Z" fill="#1A1815" stroke="#3A3221" stroke-width="1"/>
+              <path d="M120 100v32" stroke="#3A3221" stroke-width="1"/>
+              <path d="M55 122 h55 M60 127 h50" stroke="#69645A" stroke-width="0.8"/>
+              <path d="M185 122 h-55 M180 127 h-50" stroke="#69645A" stroke-width="0.8"/>
+            </g>
+          </svg>
+          <div class="empty-heading">Your knowledge, beautifully organized</div>
+          <div class="empty-sub">Create a subject folder and upload your study materials. Let SARASWATI assist you with accurate answers from your own notes.</div>
+          <button class="btn-gold">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#26190a" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+            New Folder
+          </button>
+        </div>
+      </div>
+
+      <button class="ask-float">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#26190a" stroke-width="2"><path d="M12 3l2.3 5.8L20 11l-5.7 2.2L12 19l-2.3-5.8L4 11l5.7-2.2z" fill="#26190a"/></svg>
+        Ask SARASWATI
+      </button>
+    </div>
+
+    <!-- WORKSPACE SHELL (doc + toolbar + pdf) -->
+    <div class="doc-tabs">
+      <div class="back-btn" id="backBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+        Home
+      </div>
+      <div class="doc-tab active"><span id="docTabLabel">DBMS — Unit 3</span><span class="doc-tab-close">×</span></div>
+    </div>
+    <div class="doc-toolbar">
+      <div class="doc-title-block">
+        <div class="doc-title" id="docTitle">Unit 3 — Normalization &amp; Functional Dependencies</div>
+        <div class="doc-meta" id="docMeta">DBMS · p. 8 of 22 · uploaded 5 days ago</div>
+      </div>
+      <div class="tool-group">
+        <div class="tool-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg></div>
+        <div class="zoom-label">8 / 22</div>
+        <div class="tool-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div>
+      </div>
+      <div class="tool-group">
+        <div class="tool-btn active" title="Highlight"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l6-6 4 4-6 6H9v-4z"/></svg></div>
+        <div class="tool-btn" title="Comment"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.4 8.4 0 01-9.3 8.4A9 9 0 013 12a8.4 8.4 0 0113.5-6.6"/></svg></div>
+      </div>
+      <button class="btn-ghost-gold">Export</button>
+    </div>
+    <div class="viewer-shell">
+      <div class="page">
+        <div class="kicker">DBMS · Unit 3</div>
+        <h3>Normalization &amp; Functional Dependencies</h3>
+        <p>A relation is in <span class="hl">Third Normal Form (3NF)</span> if it is in 2NF and every non-prime attribute is non-transitively dependent on every candidate key. This removes redundancy caused by transitive dependencies.</p>
+        <p>Formally, a functional dependency <span class="hl-teal">X → Y</span> holds if, for any two tuples with the same value of X, the value of Y is also identical. This is the foundation used to derive candidate keys.</p>
+        <div class="eq-block">R is in 3NF ⇔ ∀ X→A: X is a superkey OR A is prime</div>
+        <p>Decomposing a relation to remove transitive dependencies typically involves splitting it into two relations connected by the determinant attribute, preserving both dependency and lossless-join properties.</p>
+        <div class="page-num">8</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ CHAT PANEL ============ -->
+  <div class="chat">
+    <div class="chat-head">
+      <div class="chat-head-top">
+        <div class="chat-title"><span class="pulse"></span>Ask Saraswati</div>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text-secondary); cursor:pointer;"><path d="M12 5v14M5 12h14"/></svg>
+      </div>
+      <div class="scope-row">
+        <div class="scope-chip active">📄 This document</div>
+        <div class="scope-chip">📚 DBMS</div>
+        <div class="scope-chip">🗂 All notes</div>
+      </div>
+    </div>
+    <div class="chat-scroll">
+      <div class="msg user">
+        <div class="msg-avatar">M</div>
+        <div class="msg-body"><div class="msg-bubble">Why do we need 3NF if 2NF already removes partial dependencies?</div></div>
+      </div>
+      <div class="msg ai">
+        <div class="msg-avatar"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 3l2.3 5.8L20 11l-5.7 2.2L12 19l-2.3-5.8L4 11l5.7-2.2z" fill="#26190a"/></svg></div>
+        <div class="msg-body">
+          <div class="msg-bubble">2NF only eliminates dependencies on part of a composite key. 3NF goes further and removes transitive dependencies — where a non-key attribute depends on another non-key attribute rather than the key directly.</div>
+          <div class="citations">
+            <div class="citation"><span class="cnum">[1]</span><div><span class="ctext">3NF requires non-transitive dependency on every candidate key.</span><span class="csrc">DBMS — Unit 3, p. 8</span></div></div>
+            <div class="citation"><span class="cnum">[2]</span><div><span class="ctext">Decomposition preserves both dependency and lossless-join properties.</span><span class="csrc">DBMS — Unit 3, p. 8</span></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="chat-input-wrap">
+      <div class="chat-input">
+        <textarea rows="1" placeholder="Ask about this page, cite a source..."></textarea>
+        <div class="chat-input-row">
+          <div class="send-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#26190a" stroke-width="2.4"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const app = document.getElementById('app');
+  const folderView = document.getElementById('folderView');
+  const emptyView = document.getElementById('emptyView');
+  const viewTitle = document.getElementById('viewTitle');
+  const navItems = document.querySelectorAll('.nav-item');
+  const backBtn = document.getElementById('backBtn');
+
+  navItems.forEach(item=>{
+    item.addEventListener('click', ()=>{
+      navItems.forEach(n=>n.classList.remove('active'));
+      item.classList.add('active');
+      app.classList.remove('workspace-mode');
+      const view = item.dataset.view;
+      if(view === 'recent'){
+        folderView.style.display='none';
+        emptyView.style.display='flex';
+        viewTitle.textContent = item.textContent.trim();
+      } else {
+        folderView.style.display='flex';
+        emptyView.style.display='none';
+        viewTitle.textContent = item.textContent.trim().replace(/\d+$/,'').trim();
+      }
+    });
+  });
+
+  document.querySelectorAll('.folder-row').forEach(row=>{
+    row.addEventListener('click', ()=>{
+      app.classList.add('workspace-mode');
+    });
+  });
+
+  backBtn.addEventListener('click', ()=>{
+    app.classList.remove('workspace-mode');
+  });
+
+  document.querySelectorAll('.scope-chip').forEach(c=>{
+    c.addEventListener('click', ()=>{
+      document.querySelectorAll('.scope-chip').forEach(x=>x.classList.remove('active'));
+      c.classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
