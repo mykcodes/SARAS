@@ -1,0 +1,9 @@
+python-dotenv
+langchain
+langchain-core
+langchain-community
+langchain-mistralai
+unstructured
+pypdf
+langchain-text-splitters
+mistralai
