@@ -99,3 +99,20 @@ body {
     inset 0 1px 0 rgba(255, 255, 255, 0.22),
     0 12px 30px -8px rgba(201, 162, 78, 0.5);
 }
+.fade-image {
+  width: 50%;
+  height: auto;
+  object-fit: contain;
+
+  -webkit-mask-image: radial-gradient(
+    ellipse at center,
+    black -5%,
+    transparent 100%
+  );
+
+  mask-image: radial-gradient(
+    ellipse at center,
+    black -5%,
+    transparent 100%
+  );
+}

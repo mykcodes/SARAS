@@ -1,17 +1,20 @@
 import Navbar from "../components/navbar/Navbar";
-import EmptyState from "../components/home/EmptyState";
+import FolderListContainer from "../components/folder/FolderListContainer";
 import FloatingActionButton from "../components/shared/FloatingActionButton";
+import useSubjects from "../hooks/useSubjects";
 
-function HomePage() {
+function SubjectsPage() {
+  const { subjects } = useSubjects();
+
   return (
     <div className="relative flex flex-1 flex-col">
-      <Navbar title="Home" />
+      <Navbar title="Subjects" />
       <div className="flex flex-1 flex-col overflow-y-auto px-8 py-6">
-        <EmptyState onNewFolder={() => {}} />
+        <FolderListContainer folders={subjects} onNewSubject={() => {}} />
       </div>
       <FloatingActionButton />
     </div>
   );
 }
 
-export default HomePage;
+export default SubjectsPage;

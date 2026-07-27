@@ -1,6 +1,6 @@
 export const NAV_ITEMS = [
-  { id: "home", label: "Home" },
-  { id: "subjects", label: "Subjects", badge: 6 },
+  { id: "home", label: "Home", to: "/" },
+  { id: "subjects", label: "Subjects", badge: 6, to: "/subjects" },
   { id: "recent", label: "Recent" },
   { id: "favorites", label: "Favorites" },
   { id: "trash", label: "Trash" },

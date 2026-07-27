@@ -4,7 +4,7 @@ import NewFolderButton from "../navbar/NewFolderButton";
 function EmptyState({ onNewFolder }) {
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-8">
-      <KnowledgeIllustration />
+      <img src="https://i.ibb.co/C5FMW0PV/saras-book-Photoroom.png" alt="saras-book-Photoroom" border="0" className="fade-image"></img>
       <h2 className="mt-6 text-center text-[22px] font-semibold text-ink">
         Your knowledge, beautifully organized
       </h2>

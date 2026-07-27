@@ -13,7 +13,7 @@ const ICONS = {
   trash: Trash2,
 };
 
-function Sidebar({ activeItem = "home" }) {
+function Sidebar() {
   return (
     <aside className="flex h-full w-[248px] shrink-0 flex-col border-r border-border-subtle bg-bg-elevated px-4 py-5">
       <Logo />
@@ -25,7 +25,7 @@ function Sidebar({ activeItem = "home" }) {
             icon={ICONS[item.id]}
             label={item.label}
             badge={item.badge}
-            active={item.id === activeItem}
+            to={item.to}
           />
         ))}
       </nav>
