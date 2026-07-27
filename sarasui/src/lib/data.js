@@ -2,7 +2,7 @@ export const NAV_ITEMS = [
   { id: "home", label: "Home", to: "/" },
   { id: "subjects", label: "Subjects", badge: 6, to: "/subjects" },
   { id: "recent", label: "Recent" },
-  { id: "favorites", label: "Favorites" },
+  { id: "favorites", label: "Favorites", to: "/favorites"  },
   { id: "trash", label: "Trash" },
 ];
 
