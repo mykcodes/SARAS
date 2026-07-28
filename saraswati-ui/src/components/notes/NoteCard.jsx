@@ -1,12 +1,9 @@
-import { Pin, Pencil, Trash2 } from "lucide-react";
+import { memo } from "react";
+import { Pin, Pencil, Trash2, Star } from "lucide-react";
 import NoteEditor from "./NoteEditor";
 import { formatRelativeTime } from "../../lib/formatters";
 
-/**
- * Individual note card with edit/delete/pin actions.
- * When in editing mode, shows the NoteEditor inline.
- */
-function NoteCard({ note, isEditing, onEdit, onSave, onCancelEdit, onDelete, onPin }) {
+const NoteCard = memo(function NoteCard({ note, isEditing, onEdit, onSave, onCancelEdit, onDelete, onPin, onFavorite }) {
   if (isEditing) {
     return (
       <NoteEditor
@@ -25,6 +22,18 @@ function NoteCard({ note, isEditing, onEdit, onSave, onCancelEdit, onDelete, onP
           {formatRelativeTime(note.updatedAt)}
         </span>
         <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+          {onFavorite && (
+            <button
+              type="button"
+              onClick={onFavorite}
+              className={`rounded p-1 transition-colors ${
+                note.favorite ? "text-gold opacity-100" : "text-ink-faint hover:text-gold"
+              }`}
+              aria-label={note.favorite ? "Unfavorite" : "Favorite"}
+            >
+              <Star size={11} fill={note.favorite ? "currentColor" : "none"} />
+            </button>
+          )}
           <button
             type="button"
             onClick={onPin}
@@ -55,6 +64,6 @@ function NoteCard({ note, isEditing, onEdit, onSave, onCancelEdit, onDelete, onP
       </div>
     </div>
   );
-}
+});
 
 export default NoteCard;

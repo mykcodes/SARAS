@@ -2,12 +2,8 @@ import { useState, useCallback } from "react";
 import { Plus, StickyNote } from "lucide-react";
 import NoteCard from "./NoteCard";
 import NoteEditor from "./NoteEditor";
-import { getNotes, createNote, updateNote, deleteNote, pinNote } from "../../services/notesService";
+import { getNotes, createNote, updateNote, deleteNote, pinNote, favoriteNote } from "../../services/notesService";
 
-/**
- * Notes panel for the document workspace.
- * Supports create, edit, delete, and pin with mock persistence.
- */
 function NotesPanel({ documentId }) {
   const [, setVersion] = useState(0);
   const [editingId, setEditingId] = useState(null);
@@ -45,6 +41,12 @@ function NotesPanel({ documentId }) {
     refresh();
   };
 
+  const handleFavorite = (noteId) => {
+    if (!documentId) return;
+    favoriteNote(documentId, noteId);
+    refresh();
+  };
+
   if (!documentId) {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6">
@@ -58,7 +60,6 @@ function NotesPanel({ documentId }) {
 
   return (
     <div className="flex flex-1 flex-col overflow-hidden">
-      {/* Header */}
       <div className="flex items-center justify-between border-b border-border-subtle px-3 py-2.5">
         <span className="text-[12px] font-semibold text-ink">
           Notes ({notes.length})
@@ -73,7 +74,6 @@ function NotesPanel({ documentId }) {
         </button>
       </div>
 
-      {/* Note list */}
       <div className="flex flex-1 flex-col gap-2 overflow-y-auto p-3">
         {isCreating && (
           <NoteEditor
@@ -97,6 +97,7 @@ function NotesPanel({ documentId }) {
                 onCancelEdit={() => setEditingId(null)}
                 onDelete={() => handleDelete(note.id)}
                 onPin={() => handlePin(note.id)}
+                onFavorite={() => handleFavorite(note.id)}
               />
             ))}
           </>
@@ -119,6 +120,7 @@ function NotesPanel({ documentId }) {
                 onCancelEdit={() => setEditingId(null)}
                 onDelete={() => handleDelete(note.id)}
                 onPin={() => handlePin(note.id)}
+                onFavorite={() => handleFavorite(note.id)}
               />
             ))}
           </>

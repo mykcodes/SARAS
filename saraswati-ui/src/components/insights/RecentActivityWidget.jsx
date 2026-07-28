@@ -1,30 +1,50 @@
-import { Clock } from "lucide-react";
+import { FileText, Upload, Star, Trash2, StickyNote } from "lucide-react";
 import InsightCard from "./InsightCard";
 import { formatRelativeTime } from "../../lib/formatters";
+import { getActivitiesBySubject } from "../../services/activityService";
 
-function RecentActivityWidget({ activities }) {
+const ACTION_ICONS = {
+  opened: FileText,
+  uploaded: Upload,
+  favorited: Star,
+  deleted: Trash2,
+  pinned_note: StickyNote,
+};
+
+function RecentActivityWidget({ activities: staticActivities, subjectId }) {
+  const liveActivities = subjectId
+    ? getActivitiesBySubject(subjectId, 5)
+    : [];
+
+  const displayActivities = liveActivities.length > 0
+    ? liveActivities
+    : (staticActivities || []);
+
+  if (!displayActivities || displayActivities.length === 0) return null;
+
   return (
-    <InsightCard title="Recent Activity" icon={Clock}>
-      {activities.length === 0 ? (
-        <p className="text-[12px] text-ink-faint">No recent activity.</p>
-      ) : (
-        <div className="flex flex-col gap-2.5">
-          {activities.map((activity, index) => (
-            <div key={index} className="flex items-start gap-2.5">
-              <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gold" />
-              <div className="min-w-0">
-                <p className="truncate text-[12px] text-ink">
-                  <span className="text-ink-soft">{activity.action}</span>{" "}
-                  {activity.target}
+    <InsightCard title="Recent Activity" icon={FileText}>
+      <div className="flex flex-col gap-2">
+        {displayActivities.slice(0, 5).map((activity, idx) => {
+          const action = activity.action || activity.action;
+          const Icon = ACTION_ICONS[action] || FileText;
+          const target = activity.target;
+          const time = activity.timestamp || activity.time;
+          return (
+            <div key={activity.id || idx} className="flex items-start gap-2">
+              <Icon size={12} className="mt-0.5 shrink-0 text-ink-faint" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-[11.5px] text-ink-soft">
+                  {target}
                 </p>
-                <p className="text-[10.5px] text-ink-faint">
-                  {formatRelativeTime(activity.time)}
+                <p className="text-[10px] text-ink-faint">
+                  {formatRelativeTime(time)}
                 </p>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          );
+        })}
+      </div>
     </InsightCard>
   );
 }

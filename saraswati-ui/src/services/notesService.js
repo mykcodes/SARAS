@@ -1,10 +1,5 @@
-/**
- * Notes Service — mock implementation.
- *
- * Manages notes with in-memory state keyed by document ID.
- * Replace internals with API calls when backend persistence is available.
- */
 import { getNotesByDocumentId as getFromData } from "../lib/data";
+import { DOCUMENTS } from "../lib/data";
 
 const notesCache = {};
 
@@ -19,6 +14,21 @@ export function getNotes(documentId) {
   return [...ensureLoaded(documentId)];
 }
 
+export function getAllNotes() {
+  const allDocIds = new Set();
+  for (const docs of Object.values(DOCUMENTS)) {
+    for (const doc of docs) {
+      allDocIds.add(doc.id);
+    }
+  }
+  const result = [];
+  for (const docId of allDocIds) {
+    const notes = ensureLoaded(docId);
+    result.push(...notes.map((n) => ({ ...n })));
+  }
+  return result;
+}
+
 export function createNote(documentId, content) {
   const notes = ensureLoaded(documentId);
   const note = {
@@ -26,6 +36,7 @@ export function createNote(documentId, content) {
     documentId,
     content,
     pinned: false,
+    favorite: false,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
@@ -58,4 +69,24 @@ export function pinNote(documentId, noteId) {
     note.updatedAt = new Date().toISOString();
   }
   return note ? { ...note } : null;
+}
+
+export function renameNote(documentId, noteId, newContent) {
+  return updateNote(documentId, noteId, newContent);
+}
+
+export function favoriteNote(documentId, noteId) {
+  const notes = ensureLoaded(documentId);
+  const note = notes.find((n) => n.id === noteId);
+  if (note) {
+    note.favorite = !note.favorite;
+    note.updatedAt = new Date().toISOString();
+  }
+  return note ? { ...note } : null;
+}
+
+export function searchNotes(query) {
+  const q = query.toLowerCase();
+  const allNotes = getAllNotes();
+  return allNotes.filter((n) => n.content.toLowerCase().includes(q));
 }

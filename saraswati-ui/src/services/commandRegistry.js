@@ -1,18 +1,9 @@
-/**
- * Command Registry — central registry of all available actions.
- *
- * Each action is a plain object with:
- *   id, label, description, icon (lucide name), category, disabled?
- *
- * Quick Actions (Feature 4) and the future command palette (Feature 10)
- * both consume this registry. No keyboard shortcuts yet — architecture only.
- */
-
 export const ACTION_CATEGORIES = {
   ai: "AI Assistant",
   document: "Document",
   navigation: "Navigation",
   workspace: "Workspace",
+  notes: "Notes",
 };
 
 export const ACTIONS = [
@@ -88,18 +79,120 @@ export const ACTIONS = [
     category: "ai",
     disabled: false,
   },
+  {
+    id: "delete-document",
+    label: "Delete Document",
+    description: "Move document to trash",
+    icon: "Trash2",
+    category: "document",
+    disabled: false,
+  },
+  {
+    id: "favorite-document",
+    label: "Toggle Favorite",
+    description: "Add or remove document from favorites",
+    icon: "Star",
+    category: "document",
+    disabled: false,
+  },
+  {
+    id: "move-document",
+    label: "Move Document",
+    description: "Move document to another subject",
+    icon: "FolderInput",
+    category: "document",
+    disabled: false,
+  },
+  {
+    id: "download-document",
+    label: "Download Document",
+    description: "Download document to local storage",
+    icon: "Download",
+    category: "document",
+    disabled: false,
+  },
+  {
+    id: "document-details",
+    label: "Document Details",
+    description: "View document metadata and properties",
+    icon: "Info",
+    category: "document",
+    disabled: false,
+  },
+  {
+    id: "upload-document",
+    label: "Upload Document",
+    description: "Upload a new document to the workspace",
+    icon: "UploadCloud",
+    category: "workspace",
+    disabled: false,
+  },
+  {
+    id: "toggle-insights",
+    label: "Toggle Insights Panel",
+    description: "Show or hide the insights panel",
+    icon: "PanelRightOpen",
+    category: "workspace",
+    disabled: false,
+  },
+  {
+    id: "create-note",
+    label: "Create Note",
+    description: "Create a new note",
+    icon: "StickyNote",
+    category: "notes",
+    disabled: false,
+  },
+  {
+    id: "create-tag",
+    label: "Create Tag",
+    description: "Create a new reusable tag",
+    icon: "Tag",
+    category: "workspace",
+    disabled: false,
+  },
+  {
+    id: "global-search",
+    label: "Search Everything",
+    description: "Search across all subjects, documents, and notes",
+    icon: "Search",
+    category: "navigation",
+    disabled: false,
+  },
+  {
+    id: "open-recent",
+    label: "Recent Activity",
+    description: "View recent activity across all subjects",
+    icon: "Clock",
+    category: "navigation",
+    disabled: false,
+  },
+  {
+    id: "open-favorites",
+    label: "Favorites",
+    description: "View all favorited items",
+    icon: "Star",
+    category: "navigation",
+    disabled: false,
+  },
+  {
+    id: "open-trash",
+    label: "Trash",
+    description: "View and manage deleted items",
+    icon: "Trash2",
+    category: "navigation",
+    disabled: false,
+  },
 ];
 
-/**
- * Returns actions filtered by category.
- */
 export function getActionsByCategory(category) {
   return ACTIONS.filter((a) => a.category === category);
 }
 
-/**
- * Returns a single action by ID.
- */
 export function getActionById(id) {
   return ACTIONS.find((a) => a.id === id) ?? null;
+}
+
+export function getEnabledActions() {
+  return ACTIONS.filter((a) => !a.disabled);
 }

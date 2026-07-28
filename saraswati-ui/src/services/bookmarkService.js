@@ -1,9 +1,3 @@
-/**
- * Bookmark Service — mock implementation.
- *
- * Manages bookmarks across documents, AI responses, and notes.
- * Replace internals with API calls when backend is available.
- */
 import { getBookmarks as getFromData } from "../lib/data";
 
 let bookmarks = null;
@@ -44,4 +38,39 @@ export function removeBookmark(id) {
 export function isBookmarked(id) {
   init();
   return bookmarks.some((b) => b.id === id);
+}
+
+export function toggleBookmark(item) {
+  init();
+  const existing = bookmarks.find(
+    (b) =>
+      (b.documentId && b.documentId === item.documentId && b.type === item.type) ||
+      (b.subjectId && b.subjectId === item.subjectId && b.type === "subject") ||
+      (b.noteId && b.noteId === item.noteId && b.type === "note")
+  );
+  if (existing) {
+    removeBookmark(existing.id);
+    return null;
+  }
+  return addBookmark(item);
+}
+
+export function getBookmarksByItem(itemType, itemId) {
+  init();
+  return bookmarks.filter((b) => {
+    if (itemType === "document") return b.documentId === itemId;
+    if (itemType === "subject") return b.subjectId === itemId && b.type === "subject";
+    if (itemType === "note") return b.noteId === itemId;
+    return false;
+  });
+}
+
+export function searchBookmarks(query) {
+  init();
+  const q = query.toLowerCase();
+  return bookmarks.filter(
+    (b) =>
+      b.title.toLowerCase().includes(q) ||
+      (b.subtitle && b.subtitle.toLowerCase().includes(q))
+  );
 }
