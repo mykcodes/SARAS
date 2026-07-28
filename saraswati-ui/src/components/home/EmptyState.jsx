@@ -1,5 +1,5 @@
-import KnowledgeIllustration from "../shared/KnowledgeIllustration";
 import NewFolderButton from "../navbar/NewFolderButton";
+
 
 function EmptyState({ onNewFolder }) {
   return (

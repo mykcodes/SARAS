@@ -1,13 +1,19 @@
+import { Link } from "react-router-dom";
 import { MoreHorizontal } from "lucide-react";
 import FolderIcon from "./FolderIcon";
+import { formatFileCount, formatRelativeTime } from "../../lib/formatters";
 
 function FolderCard({ folder }) {
   return (
-    <div className="gold-glow-hover flex h-full flex-col justify-between gap-4 rounded-xl border border-border-subtle bg-surface p-4">
+    <Link
+      to={`/subjects/${folder.id}`}
+      className="gold-glow-hover flex h-full flex-col justify-between gap-4 rounded-xl border border-border-subtle bg-surface p-4"
+    >
       <div className="flex items-start justify-between">
-        <FolderIcon color={folder.iconBg} />
+        <FolderIcon color={folder.color} />
         <button
           type="button"
+          onClick={(event) => event.stopPropagation()}
           className="rounded-md p-1 text-ink-soft transition-colors hover:bg-surface-hover hover:text-ink"
           aria-label="Folder options"
         >
@@ -16,12 +22,13 @@ function FolderCard({ folder }) {
       </div>
 
       <div className="min-w-0">
-        <p className="truncate text-[14.5px] font-medium text-ink">{folder.name}</p>
+        <p className="truncate text-[14.5px] font-medium text-ink">{folder.title}</p>
         <p className="mt-1 truncate text-[12.5px] text-ink-soft">
-          {folder.fileCount} <span className="mx-1.5 text-ink-faint">•</span> {folder.lastUpdated}
+          {formatFileCount(folder.fileCount)}{" "}
+          <span className="mx-1.5 text-ink-faint">•</span> {formatRelativeTime(folder.updatedAt)}
         </p>
       </div>
-    </div>
+    </Link>
   );
 }
 

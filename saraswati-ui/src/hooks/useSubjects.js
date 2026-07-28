@@ -1,7 +1,7 @@
-import { FOLDERS } from "../lib/data";
+import { SUBJECTS } from "../lib/data";
 
 /**
- * Data-access hook for subject folders.
+ * Data-access hook for the subject list.
  *
  * Currently backed by static mock data. The return shape ({ subjects,
  * isLoading, error }) is intentionally the same shape a real data-fetching
@@ -11,7 +11,7 @@ import { FOLDERS } from "../lib/data";
  */
 function useSubjects() {
   return {
-    subjects: FOLDERS,
+    subjects: SUBJECTS,
     isLoading: false,
     error: null,
   };

@@ -45,7 +45,7 @@ function SidebarItem({ icon, label, badge, to }) {
   }
 
   return (
-    <NavLink to={to} end className={({ isActive }) => getClassName(isActive)}>
+    <NavLink to={to} end={to === "/"} className={({ isActive }) => getClassName(isActive)}>
       {({ isActive }) => (
         <ItemContent icon={icon} label={label} badge={badge} isActive={isActive} />
       )}
