@@ -1,0 +1,309 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+
+  --color-bg: #0a0a0b;
+  --color-bg-elevated: #0d0d0f;
+  --color-surface: #131316;
+  --color-surface-soft: #17171b;
+  --color-surface-hover: #1c1c21;
+
+  --color-gold-light: #e8cd8a;
+  --color-gold: #c9a24e;
+  --color-gold-soft: #b6924a;
+  --color-gold-dark: #8a6a2e;
+
+  --color-border-subtle: rgba(201, 162, 78, 0.14);
+  --color-border-default: rgba(201, 162, 78, 0.22);
+  --color-border-strong: rgba(201, 162, 78, 0.4);
+
+  --color-ink: #f2ede1;
+  --color-ink-soft: #9a978f;
+  --color-ink-faint: #605d56;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-default);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border-strong);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(180deg, var(--color-gold-light) 0%, var(--color-gold) 55%, var(--color-gold-dark) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gold-gradient-bg {
+  background: linear-gradient(180deg, var(--color-gold-light) 0%, var(--color-gold) 60%, var(--color-gold-soft) 100%);
+}
+
+.gold-glow-hover {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+}
+.gold-glow-hover:hover {
+  box-shadow: 0 0 0 1px var(--color-border-strong), 0 0 18px -4px rgba(201, 162, 78, 0.35);
+}
+
+.glass-surface {
+  background: linear-gradient(180deg, rgba(23, 23, 27, 0.55), rgba(13, 13, 15, 0.42));
+  backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid rgba(201, 162, 78, 0.24);
+  box-shadow:
+    inset 0 1px 0 rgba(232, 205, 138, 0.08),
+    0 8px 22px -10px rgba(0, 0, 0, 0.55);
+}
+
+.glass-surface:focus-within {
+  border-color: rgba(201, 162, 78, 0.45);
+}
+
+.glass-gold {
+  background: linear-gradient(180deg, rgba(232, 205, 138, 0.24), rgba(138, 106, 46, 0.18));
+  backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid rgba(232, 205, 138, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    0 10px 26px -8px rgba(201, 162, 78, 0.4);
+  color: var(--color-gold-light);
+  transition: filter 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+}
+
+.glass-gold:hover {
+  filter: brightness(1.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 12px 30px -8px rgba(201, 162, 78, 0.5);
+}
+.fade-image {
+  width: 60%;
+  height: auto;
+  object-fit: contain;
+
+  -webkit-mask-image: radial-gradient(
+    ellipse at center,
+    black -5%,
+    transparent 100%
+  );
+
+  mask-image: radial-gradient(
+    ellipse at center,
+    black -5%,
+    transparent 100%
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Upload progress bar                                                */
+/* ------------------------------------------------------------------ */
+@keyframes progress-stripe {
+  0% { background-position: 0 0; }
+  100% { background-position: 40px 0; }
+}
+
+.progress-bar-animated {
+  background-image: linear-gradient(
+    45deg,
+    rgba(255,255,255,0.1) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255,255,255,0.1) 50%,
+    rgba(255,255,255,0.1) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 40px 40px;
+  animation: progress-stripe 0.8s linear infinite;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Skeleton loading shimmer                                            */
+/* ------------------------------------------------------------------ */
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-soft) 0%,
+    var(--color-surface-hover) 50%,
+    var(--color-surface-soft) 100%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.8s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Modal overlay                                                       */
+/* ------------------------------------------------------------------ */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-overlay {
+  animation: fade-in 0.2s ease-out;
+}
+
+.modal-content {
+  animation: slide-up 0.25s ease-out;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Drop zone                                                           */
+/* ------------------------------------------------------------------ */
+.drop-zone {
+  border: 2px dashed var(--color-border-default);
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.drop-zone.active {
+  border-color: var(--color-gold);
+  background-color: rgba(201, 162, 78, 0.06);
+  box-shadow: 0 0 0 4px rgba(201, 162, 78, 0.12);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Insights panel slide                                                */
+/* ------------------------------------------------------------------ */
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Card hover elevation                                                */
+/* ------------------------------------------------------------------ */
+.card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -8px rgba(0, 0, 0, 0.4);
+  border-color: var(--color-border-default);
+}
+
+/* ------------------------------------------------------------------ */
+/*  Circular progress ring                                              */
+/* ------------------------------------------------------------------ */
+.progress-ring-circle {
+  transition: stroke-dashoffset 0.6s ease;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+}
+
+/* ------------------------------------------------------------------ */
+/*  AI thinking indicator                                               */
+/* ------------------------------------------------------------------ */
+@keyframes pulse-dot {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+.typing-dots span {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-gold);
+  animation: pulse-dot 1.4s ease-in-out infinite;
+}
+
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+/* ------------------------------------------------------------------ */
+/*  AI message entrance                                                 */
+/* ------------------------------------------------------------------ */
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ai-message-enter {
+  animation: fade-in-up 0.3s ease-out;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Knowledge graph placeholder nodes                                   */
+/* ------------------------------------------------------------------ */
+@keyframes float-node {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.graph-node {
+  animation: float-node 3s ease-in-out infinite;
+}
+
+.graph-node:nth-child(2) { animation-delay: 0.5s; }
+.graph-node:nth-child(3) { animation-delay: 1s; }
+.graph-node:nth-child(4) { animation-delay: 1.5s; }
+.graph-node:nth-child(5) { animation-delay: 2s; }
+
+/* ------------------------------------------------------------------ */
+/*  Conversation sidebar slide                                          */
+/* ------------------------------------------------------------------ */
+@keyframes slide-in-left {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.slide-in-left {
+  animation: slide-in-left 0.3s ease-out;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Tab active indicator                                                */
+/* ------------------------------------------------------------------ */
+.tab-active {
+  position: relative;
+}
+
+.tab-active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-gold);
+  border-radius: 2px 2px 0 0;
+}

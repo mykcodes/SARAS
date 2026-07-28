@@ -4,14 +4,21 @@ import TopicsCoveredWidget from "./TopicsCoveredWidget";
 import ExamReadinessWidget from "./ExamReadinessWidget";
 import RecentActivityWidget from "./RecentActivityWidget";
 import RecommendedNextWidget from "./RecommendedNextWidget";
+import WeakTopicsWidget from "./WeakTopicsWidget";
+import StudyStreakWidget from "./StudyStreakWidget";
+import AIUsageWidget from "./AIUsageWidget";
+import RevisionReminderWidget from "./RevisionReminderWidget";
+import ReadingTimeWidget from "./ReadingTimeWidget";
+import FrequentConceptsWidget from "./FrequentConceptsWidget";
 import InsightCard from "./InsightCard";
-import useWorkspaceInsights from "../../hooks/useWorkspaceInsights";
+import KnowledgeGraphPlaceholder from "../knowledge-graph/KnowledgeGraphPlaceholder";
 import { useWorkspace } from "../../context/WorkspaceContext";
+import { getFullInsights } from "../../services/insightsService";
 import { formatRelativeTime } from "../../lib/formatters";
 
 function InsightsPanel({ subjectId }) {
   const { insightsPanelOpen, toggleInsights } = useWorkspace();
-  const { insights } = useWorkspaceInsights(subjectId);
+  const insights = getFullInsights(subjectId);
 
   if (!insightsPanelOpen || !insights) return null;
 
@@ -33,12 +40,20 @@ function InsightsPanel({ subjectId }) {
         </button>
       </div>
 
-      {/* Widgets */}
+      {/* Existing Widgets */}
       <StudyProgressWidget progress={insights.studyProgress} />
       <ExamReadinessWidget readiness={insights.examReadiness} />
       <TopicsCoveredWidget topics={insights.topicsCovered} />
       <RecommendedNextWidget recommendation={insights.recommendedNext} />
       <RecentActivityWidget activities={insights.recentActivity} />
+
+      {/* New Widgets (Feature 6) */}
+      <StudyStreakWidget streak={insights.studyStreak} />
+      <WeakTopicsWidget topics={insights.weakTopics} />
+      <RevisionReminderWidget reminder={insights.revisionReminder} />
+      <ReadingTimeWidget readingTime={insights.readingTime} />
+      <AIUsageWidget usage={insights.aiUsage} />
+      <FrequentConceptsWidget concepts={insights.frequentConcepts} />
 
       {/* AI Index Status */}
       <InsightCard title="AI Index Status" icon={Sparkles}>
@@ -72,6 +87,9 @@ function InsightsPanel({ subjectId }) {
           {formatRelativeTime(insights.lastStudySession)}
         </p>
       </InsightCard>
+
+      {/* Knowledge Graph Placeholder (Feature 7) */}
+      <KnowledgeGraphPlaceholder />
     </aside>
   );
 }
