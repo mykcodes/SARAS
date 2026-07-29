@@ -3,7 +3,7 @@ import PreviewToolbar from "./PreviewToolbar";
 import BookmarksPanel from "../bookmarks/BookmarksPanel";
 import AIPanel from "../ai/AIPanel";
 import { AIProvider } from "../../context/AIContext";
-import PDFViewer from "../pdf/PDFViewer.pdf";
+import PDFViewer from "../pdf/PDFViewer";
 
 function DocumentPreviewShell({ document, subjectId }) {
   const fileSource = "/thermo.pdf"
