@@ -12,6 +12,7 @@ const initialState = {
   conversationSidebarOpen: false,
   activeConversationId: null,
   activeTab: "ai",           // "ai" | "notes" | "bookmarks"
+  isPanelOpen: false,        // global slide-over panel visibility
 };
 
 // ---------------------------------------------------------------------------
@@ -64,6 +65,15 @@ function aiReducer(state, action) {
 
     case "SET_ACTIVE_TAB":
       return { ...state, activeTab: action.tab };
+
+    case "OPEN_PANEL":
+      return { ...state, isPanelOpen: true };
+
+    case "CLOSE_PANEL":
+      return { ...state, isPanelOpen: false };
+
+    case "TOGGLE_PANEL":
+      return { ...state, isPanelOpen: !state.isPanelOpen };
 
     default:
       return state;
@@ -122,6 +132,10 @@ export function AIProvider({ document, subjectId, children }) {
     []
   );
 
+  const openPanel = useCallback(() => dispatch({ type: "OPEN_PANEL" }), []);
+  const closePanel = useCallback(() => dispatch({ type: "CLOSE_PANEL" }), []);
+  const togglePanel = useCallback(() => dispatch({ type: "TOGGLE_PANEL" }), []);
+
   const value = useMemo(
     () => ({
       ...state,
@@ -133,6 +147,9 @@ export function AIProvider({ document, subjectId, children }) {
       loadConversation,
       toggleConversationSidebar,
       setActiveTab,
+      openPanel,
+      closePanel,
+      togglePanel,
     }),
     [
       state,
@@ -144,6 +161,9 @@ export function AIProvider({ document, subjectId, children }) {
       loadConversation,
       toggleConversationSidebar,
       setActiveTab,
+      openPanel,
+      closePanel,
+      togglePanel,
     ]
   );
 
