@@ -45,7 +45,7 @@ function InsightsPanel({ subjectId }) {
       <ExamReadinessWidget readiness={insights.examReadiness} />
       <TopicsCoveredWidget topics={insights.topicsCovered} />
       <RecommendedNextWidget recommendation={insights.recommendedNext} />
-      <RecentActivityWidget activities={insights.recentActivity} />
+      <RecentActivityWidget activities={insights.recentActivity} subjectId={subjectId} />
 
       {/* New Widgets (Feature 6) */}
       <StudyStreakWidget streak={insights.studyStreak} />

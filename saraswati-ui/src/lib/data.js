@@ -5,9 +5,9 @@ const hoursAgo = (hours) => new Date(Date.now() - hours * 60 * 60 * 1000).toISOS
 export const NAV_ITEMS = [
   { id: "home", label: "Home", to: "/" },
   { id: "subjects", label: "Subjects", badge: 6, to: "/subjects" },
-  { id: "recent", label: "Recent" },
-  { id: "favorites", label: "Favorites" },
-  { id: "trash", label: "Trash" },
+  { id: "recent", label: "Recent", to: "/recent" },
+  { id: "favorites", label: "Favorites", to: "/favorites" },
+  { id: "trash", label: "Trash", to: "/trash" },
 ];
 
 /**

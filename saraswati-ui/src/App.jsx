@@ -1,10 +1,27 @@
+import { lazy, Suspense } from "react";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
+import ErrorBoundary from "./components/shared/ErrorBoundary";
 import HomePage from "./pages/HomePage";
 import SubjectsPage from "./pages/SubjectsPage";
 import SubjectWorkspacePage from "./pages/SubjectWorkspacePage";
 import DocumentPreviewPage from "./pages/DocumentPreviewPage";
+import Skeleton from "./components/shared/Skeleton";
 import { getSubjectById, getDocumentById } from "./lib/data";
+
+const RecentPage = lazy(() => import("./pages/RecentPage"));
+const FavoritesPage = lazy(() => import("./pages/FavoritesPage"));
+const TrashPage = lazy(() => import("./pages/TrashPage"));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage"));
+
+function LazyFallback() {
+  return (
+    <div className="flex flex-1 flex-col gap-6 px-8 py-6">
+      <Skeleton className="h-8 w-48" style={{ borderRadius: 8 }} />
+      <Skeleton.Grid count={4} />
+    </div>
+  );
+}
 
 const router = createBrowserRouter([
   {
@@ -41,12 +58,51 @@ const router = createBrowserRouter([
           },
         ],
       },
+      {
+        path: "recent",
+        element: (
+          <Suspense fallback={<LazyFallback />}>
+            <RecentPage />
+          </Suspense>
+        ),
+        handle: { crumb: () => "Recent" },
+      },
+      {
+        path: "favorites",
+        element: (
+          <Suspense fallback={<LazyFallback />}>
+            <FavoritesPage />
+          </Suspense>
+        ),
+        handle: { crumb: () => "Favorites" },
+      },
+      {
+        path: "trash",
+        element: (
+          <Suspense fallback={<LazyFallback />}>
+            <TrashPage />
+          </Suspense>
+        ),
+        handle: { crumb: () => "Trash" },
+      },
+      {
+        path: "*",
+        element: (
+          <Suspense fallback={<LazyFallback />}>
+            <NotFoundPage />
+          </Suspense>
+        ),
+      },
     ],
   },
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <ErrorBoundary>
+      <RouterProvider router={router} />
+    </ErrorBoundary>
+  );
 }
 
 export default App;

@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from "react";
-import { MoreHorizontal, ExternalLink, Pencil, Download, FolderInput, Trash2 } from "lucide-react";
+import { MoreHorizontal, ExternalLink, Pencil, Download, FolderInput, Trash2, Info } from "lucide-react";
 
 const ACTIONS = [
   { id: "open", label: "Open", icon: ExternalLink },
   { id: "rename", label: "Rename", icon: Pencil },
+  { id: "details", label: "Details", icon: Info },
   { id: "download", label: "Download", icon: Download },
   { id: "move", label: "Move to…", icon: FolderInput },
   { id: "delete", label: "Delete", icon: Trash2, danger: true },
