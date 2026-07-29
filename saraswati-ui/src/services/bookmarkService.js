@@ -1,47 +1,50 @@
-import { getBookmarks as getFromData } from "../lib/data";
-
-let bookmarks = null;
-
-function init() {
-  if (!bookmarks) {
-    bookmarks = getFromData().map((b) => ({ ...b }));
-  }
-}
+import { storageManager } from "./storageManager";
+import { logActivity } from "./activityService";
 
 export function getAllBookmarks() {
-  init();
-  return [...bookmarks];
+  return storageManager.getItem("bookmarks", []);
 }
 
 export function getBookmarksByType(type) {
-  init();
+  const bookmarks = getAllBookmarks();
   return bookmarks.filter((b) => b.type === type);
 }
 
 export function addBookmark(item) {
-  init();
+  const bookmarks = getAllBookmarks();
   const bookmark = {
     id: `bm-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     createdAt: new Date().toISOString(),
     ...item,
   };
   bookmarks.unshift(bookmark);
+  storageManager.setItem("bookmarks", bookmarks);
+
+  logActivity("bookmarked", item.title || "Item", { 
+    targetType: item.type, 
+    subjectId: item.subjectId, 
+    documentId: item.documentId 
+  });
+
   return { ...bookmark };
 }
 
 export function removeBookmark(id) {
-  init();
+  const bookmarks = getAllBookmarks();
   const idx = bookmarks.findIndex((b) => b.id === id);
-  if (idx !== -1) bookmarks.splice(idx, 1);
+  if (idx !== -1) {
+    bookmarks.splice(idx, 1);
+    storageManager.setItem("bookmarks", bookmarks);
+  }
 }
 
 export function isBookmarked(id) {
-  init();
+  const bookmarks = getAllBookmarks();
   return bookmarks.some((b) => b.id === id);
 }
 
 export function toggleBookmark(item) {
-  init();
+  const bookmarks = getAllBookmarks();
   const existing = bookmarks.find(
     (b) =>
       (b.documentId && b.documentId === item.documentId && b.type === item.type) ||
@@ -56,7 +59,7 @@ export function toggleBookmark(item) {
 }
 
 export function getBookmarksByItem(itemType, itemId) {
-  init();
+  const bookmarks = getAllBookmarks();
   return bookmarks.filter((b) => {
     if (itemType === "document") return b.documentId === itemId;
     if (itemType === "subject") return b.subjectId === itemId && b.type === "subject";
@@ -66,8 +69,8 @@ export function getBookmarksByItem(itemType, itemId) {
 }
 
 export function searchBookmarks(query) {
-  init();
   const q = query.toLowerCase();
+  const bookmarks = getAllBookmarks();
   return bookmarks.filter(
     (b) =>
       b.title.toLowerCase().includes(q) ||

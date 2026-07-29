@@ -1,17 +1,29 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Plus, StickyNote } from "lucide-react";
 import NoteCard from "./NoteCard";
 import NoteEditor from "./NoteEditor";
 import { getNotes, createNote, updateNote, deleteNote, pinNote, favoriteNote } from "../../services/notesService";
+import { storageManager } from "../../services/storageManager";
 
 function NotesPanel({ documentId }) {
-  const [, setVersion] = useState(0);
+  const [notes, setNotes] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
 
-  const refresh = useCallback(() => setVersion((v) => v + 1), []);
+  useEffect(() => {
+    if (!documentId) return;
+    
+    // Initial load
+    setNotes(getNotes(documentId));
 
-  const notes = documentId ? getNotes(documentId) : [];
+    // Subscribe to changes
+    const unsubscribe = storageManager.subscribe("notes", () => {
+      setNotes(getNotes(documentId));
+    });
+
+    return () => unsubscribe();
+  }, [documentId]);
+
   const pinned = notes.filter((n) => n.pinned);
   const unpinned = notes.filter((n) => !n.pinned);
 
@@ -19,32 +31,27 @@ function NotesPanel({ documentId }) {
     if (!documentId || !content.trim()) return;
     createNote(documentId, content.trim());
     setIsCreating(false);
-    refresh();
   };
 
   const handleUpdate = (noteId, content) => {
     if (!documentId) return;
     updateNote(documentId, noteId, content);
     setEditingId(null);
-    refresh();
   };
 
   const handleDelete = (noteId) => {
     if (!documentId) return;
     deleteNote(documentId, noteId);
-    refresh();
   };
 
   const handlePin = (noteId) => {
     if (!documentId) return;
     pinNote(documentId, noteId);
-    refresh();
   };
 
   const handleFavorite = (noteId) => {
     if (!documentId) return;
     favoriteNote(documentId, noteId);
-    refresh();
   };
 
   if (!documentId) {

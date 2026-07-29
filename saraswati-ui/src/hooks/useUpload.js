@@ -1,20 +1,10 @@
 import { useState, useCallback, useRef } from "react";
 import { useWorkspace } from "../context/WorkspaceContext";
 import { resolveFileType, MAX_FILE_SIZE, generateId } from "../lib/utils";
+import { uploadDocument } from "../services/documentService";
 
-/**
- * Upload-simulation hook.
- *
- * Validates files, manages an upload queue with simulated progress,
- * and adds completed documents into the workspace via context.
- * When a real API is available, replace the simulateOne() internals.
- *
- * Upload queue item shape:
- *   { id, file, fileName, fileType, progress, status, error }
- *   status: "queued" | "uploading" | "success" | "error"
- */
 function useUpload() {
-  const { documents, addDocument } = useWorkspace();
+  const { documents, subjectId } = useWorkspace();
   const [queue, setQueue] = useState([]);
   const intervalsRef = useRef({});
 
@@ -62,24 +52,15 @@ function useUpload() {
               );
             }
 
-            // Success — add document to workspace
-            const newDoc = {
-              id: generateId(),
-              title: item.fileName.replace(/\.[^.]+$/, ""),
-              type: item.fileType,
-              size: item.file.size,
-              pages: Math.floor(Math.random() * 40) + 5,
-              uploadedAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString(),
-              lastOpened: null,
-              favorite: false,
-              indexed: false,
-              thumbnailPlaceholder: null,
-              embeddingStatus: "pending",
-              summary: null,
-              tags: [],
-            };
-            addDocument(newDoc);
+            // Success — add document to workspace via service
+            if (subjectId) {
+              uploadDocument(subjectId, {
+                title: item.fileName.replace(/\.[^.]+$/, ""),
+                type: item.fileType,
+                size: item.file.size,
+                pages: Math.floor(Math.random() * 40) + 5,
+              });
+            }
 
             return prev.map((q) =>
               q.id === item.id ? { ...q, progress: 100, status: "success" } : q
@@ -94,7 +75,7 @@ function useUpload() {
 
       intervalsRef.current[item.id] = interval;
     },
-    [addDocument]
+    [subjectId]
   );
 
   // --- Public: add files to queue and start uploading ---

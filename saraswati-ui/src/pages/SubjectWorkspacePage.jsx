@@ -55,7 +55,12 @@ function WorkspaceContent({ subject }) {
         addToast(`Move "${doc.title}" — coming soon`, "info");
         break;
       case "bookmark":
-        addToast(`Bookmarked "${doc.title}"`, "success");
+        {
+          import("../services/bookmarkService").then(({ toggleBookmark }) => {
+            const isNowBookmarked = toggleBookmark({ documentId: doc.id, subjectId, type: "document", title: doc.title });
+            addToast(`"${doc.title}" ${isNowBookmarked ? "added to bookmarks" : "removed from bookmarks"}`, "success");
+          });
+        }
         break;
       default:
         break;

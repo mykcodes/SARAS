@@ -1,4 +1,5 @@
-import { SUBJECTS, DOCUMENTS } from "../lib/data";
+import { getSubjects } from "./subjectService";
+import { getDocuments } from "./documentService";
 import { getConversations } from "./conversationService";
 import { getAllBookmarks } from "./bookmarkService";
 import { getAllNotes } from "./notesService";
@@ -10,23 +11,17 @@ export function globalSearch(query) {
 
   const q = query.toLowerCase().trim();
 
-  const subjects = SUBJECTS.filter(
+  const subjects = getSubjects().filter(
     (s) =>
       s.title.toLowerCase().includes(q) ||
-      s.description.toLowerCase().includes(q)
+      (s.description && s.description.toLowerCase().includes(q))
   ).map((s) => ({ ...s, resultType: "subject" }));
 
-  const documents = [];
-  for (const [subjectId, docs] of Object.entries(DOCUMENTS)) {
-    for (const doc of docs) {
-      if (
-        doc.title.toLowerCase().includes(q) ||
-        doc.tags.some((t) => t.toLowerCase().includes(q))
-      ) {
-        documents.push({ ...doc, subjectId, resultType: "document" });
-      }
-    }
-  }
+  const documents = getDocuments().filter(
+    (doc) =>
+      doc.title.toLowerCase().includes(q) ||
+      doc.tags.some((t) => t.toLowerCase().includes(q))
+  ).map((doc) => ({ ...doc, resultType: "document" }));
 
   const allNotes = getAllNotes();
   const notes = allNotes.filter((n) =>

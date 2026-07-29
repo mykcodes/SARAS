@@ -1,19 +1,46 @@
-import { SUBJECTS } from "../lib/data";
+import { useState, useEffect, useCallback } from "react";
+import { storageManager } from "../services/storageManager";
+import { getSubjects, createSubject, updateSubject, deleteSubject, favoriteSubject } from "../services/subjectService";
 
-/**
- * Data-access hook for the subject list.
- *
- * Currently backed by static mock data. The return shape ({ subjects,
- * isLoading, error }) is intentionally the same shape a real data-fetching
- * hook (React Query, SWR, or a plain fetch effect) would return, so that
- * swapping in a backend later only requires changing this file's internals,
- * not any component that consumes it.
- */
 function useSubjects() {
+  const [subjects, setSubjects] = useState(getSubjects());
+
+  useEffect(() => {
+    // Initial load
+    setSubjects(getSubjects());
+
+    // Subscribe to changes
+    const unsubscribe = storageManager.subscribe("subjects", () => {
+      setSubjects(getSubjects());
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const create = useCallback((data) => {
+    return createSubject(data);
+  }, []);
+
+  const update = useCallback((id, updates) => {
+    return updateSubject(id, updates);
+  }, []);
+
+  const remove = useCallback((id) => {
+    return deleteSubject(id);
+  }, []);
+
+  const toggleFavorite = useCallback((id) => {
+    return favoriteSubject(id);
+  }, []);
+
   return {
-    subjects: SUBJECTS,
+    subjects,
     isLoading: false,
     error: null,
+    createSubject: create,
+    updateSubject: update,
+    deleteSubject: remove,
+    favoriteSubject: toggleFavorite,
   };
 }
 

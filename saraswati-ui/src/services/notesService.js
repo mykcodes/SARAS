@@ -1,36 +1,17 @@
-import { getNotesByDocumentId as getFromData } from "../lib/data";
-import { DOCUMENTS } from "../lib/data";
+import { storageManager } from "./storageManager";
+import { logActivity } from "./activityService";
 
-const notesCache = {};
-
-function ensureLoaded(documentId) {
-  if (!notesCache[documentId]) {
-    notesCache[documentId] = getFromData(documentId).map((n) => ({ ...n }));
-  }
-  return notesCache[documentId];
+export function getAllNotes() {
+  return storageManager.getItem("notes", []);
 }
 
 export function getNotes(documentId) {
-  return [...ensureLoaded(documentId)];
-}
-
-export function getAllNotes() {
-  const allDocIds = new Set();
-  for (const docs of Object.values(DOCUMENTS)) {
-    for (const doc of docs) {
-      allDocIds.add(doc.id);
-    }
-  }
-  const result = [];
-  for (const docId of allDocIds) {
-    const notes = ensureLoaded(docId);
-    result.push(...notes.map((n) => ({ ...n })));
-  }
-  return result;
+  const allNotes = getAllNotes();
+  return allNotes.filter((n) => n.documentId === documentId);
 }
 
 export function createNote(documentId, content) {
-  const notes = ensureLoaded(documentId);
+  const notes = getAllNotes();
   const note = {
     id: `note-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
     documentId,
@@ -41,34 +22,54 @@ export function createNote(documentId, content) {
     updatedAt: new Date().toISOString(),
   };
   notes.unshift(note);
+  storageManager.setItem("notes", notes);
+  
+  // Try to find the document title for logging
+  const docs = storageManager.getItem("documents", []);
+  const doc = docs.find(d => d.id === documentId);
+  if (doc) {
+    logActivity("created_note", doc.title, { targetType: "note", subjectId: doc.subjectId, documentId, noteId: note.id });
+  }
+
   return { ...note };
 }
 
 export function updateNote(documentId, noteId, content) {
-  const notes = ensureLoaded(documentId);
-  const note = notes.find((n) => n.id === noteId);
-  if (note) {
-    note.content = content;
-    note.updatedAt = new Date().toISOString();
+  const notes = getAllNotes();
+  const index = notes.findIndex((n) => n.id === noteId && n.documentId === documentId);
+  if (index !== -1) {
+    notes[index].content = content;
+    notes[index].updatedAt = new Date().toISOString();
+    storageManager.setItem("notes", notes);
+    return { ...notes[index] };
   }
-  return note ? { ...note } : null;
+  return null;
 }
 
 export function deleteNote(documentId, noteId) {
-  const notes = ensureLoaded(documentId);
-  const idx = notes.findIndex((n) => n.id === noteId);
-  if (idx !== -1) notes.splice(idx, 1);
-  notesCache[documentId] = notes;
+  const notes = getAllNotes();
+  const newNotes = notes.filter((n) => !(n.id === noteId && n.documentId === documentId));
+  storageManager.setItem("notes", newNotes);
 }
 
 export function pinNote(documentId, noteId) {
-  const notes = ensureLoaded(documentId);
-  const note = notes.find((n) => n.id === noteId);
-  if (note) {
-    note.pinned = !note.pinned;
-    note.updatedAt = new Date().toISOString();
+  const notes = getAllNotes();
+  const index = notes.findIndex((n) => n.id === noteId && n.documentId === documentId);
+  if (index !== -1) {
+    notes[index].pinned = !notes[index].pinned;
+    notes[index].updatedAt = new Date().toISOString();
+    storageManager.setItem("notes", notes);
+    
+    if (notes[index].pinned) {
+      const docs = storageManager.getItem("documents", []);
+      const doc = docs.find(d => d.id === documentId);
+      if (doc) {
+        logActivity("pinned_note", doc.title, { targetType: "note", subjectId: doc.subjectId, documentId, noteId });
+      }
+    }
+    return { ...notes[index] };
   }
-  return note ? { ...note } : null;
+  return null;
 }
 
 export function renameNote(documentId, noteId, newContent) {
@@ -76,13 +77,15 @@ export function renameNote(documentId, noteId, newContent) {
 }
 
 export function favoriteNote(documentId, noteId) {
-  const notes = ensureLoaded(documentId);
-  const note = notes.find((n) => n.id === noteId);
-  if (note) {
-    note.favorite = !note.favorite;
-    note.updatedAt = new Date().toISOString();
+  const notes = getAllNotes();
+  const index = notes.findIndex((n) => n.id === noteId && n.documentId === documentId);
+  if (index !== -1) {
+    notes[index].favorite = !notes[index].favorite;
+    notes[index].updatedAt = new Date().toISOString();
+    storageManager.setItem("notes", notes);
+    return { ...notes[index] };
   }
-  return note ? { ...note } : null;
+  return null;
 }
 
 export function searchNotes(query) {
@@ -90,3 +93,4 @@ export function searchNotes(query) {
   const allNotes = getAllNotes();
   return allNotes.filter((n) => n.content.toLowerCase().includes(q));
 }
+

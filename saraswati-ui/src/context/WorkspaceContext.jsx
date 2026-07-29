@@ -1,6 +1,7 @@
-import { createContext, useContext, useReducer, useCallback, useMemo } from "react";
-import { getDocumentsBySubjectId } from "../lib/data";
+import { createContext, useContext, useReducer, useCallback, useMemo, useEffect } from "react";
+import { getDocumentsBySubjectId, favoriteDocument, deleteDocument } from "../services/documentService";
 import { getPreference, setPreference } from "../services/preferencesService";
+import { storageManager } from "../services/storageManager";
 
 const initialState = {
   subjectId: null,
@@ -25,6 +26,9 @@ function workspaceReducer(state, action) {
         viewMode: getPreference("viewMode") || "grid",
         sortMode: getPreference("sortMode") || "newest",
       };
+
+    case "INIT_DOCS":
+      return { ...state, documents: action.documents };
 
     case "SET_SEARCH":
       return { ...state, searchQuery: action.query };
@@ -136,6 +140,16 @@ export function WorkspaceProvider({ subjectId, children }) {
     sortMode: getPreference("sortMode") || "newest",
   });
 
+  useEffect(() => {
+    // Subscribe to documents collection
+    const unsubscribe = storageManager.subscribe("documents", () => {
+      const newDocs = getDocumentsBySubjectId(subjectId);
+      // We can dispatch an INIT_DOCS action, let's create one
+      dispatch({ type: "INIT_DOCS", documents: newDocs });
+    });
+    return () => unsubscribe();
+  }, [subjectId]);
+
   const setSearchQuery = useCallback(
     (query) => dispatch({ type: "SET_SEARCH", query }),
     []
@@ -159,24 +173,39 @@ export function WorkspaceProvider({ subjectId, children }) {
     []
   );
   const toggleFavorite = useCallback(
-    (docId) => dispatch({ type: "TOGGLE_FAVORITE", docId }),
-    []
+    (docId) => {
+      favoriteDocument(subjectId, docId);
+      // Let the subscription handle the state update
+    },
+    [subjectId]
   );
   const bulkFavorite = useCallback(
-    (docIds) => dispatch({ type: "BULK_FAVORITE", docIds }),
-    []
+    (docIds) => {
+      docIds.forEach((id) => favoriteDocument(subjectId, id));
+      dispatch({ type: "CLEAR_SELECTION" });
+    },
+    [subjectId]
   );
   const addDocument = useCallback(
-    (document) => dispatch({ type: "ADD_DOCUMENT", document }),
+    (document) => {
+      // documentService handles adding, this might be called for optimisitic updates
+      dispatch({ type: "ADD_DOCUMENT", document });
+    },
     []
   );
   const removeDocument = useCallback(
-    (docId) => dispatch({ type: "REMOVE_DOCUMENT", docId }),
-    []
+    (docId) => {
+      deleteDocument(subjectId, docId);
+      dispatch({ type: "DESELECT_DOCUMENT", docId });
+    },
+    [subjectId]
   );
   const removeDocuments = useCallback(
-    (docIds) => dispatch({ type: "REMOVE_DOCUMENTS", docIds }),
-    []
+    (docIds) => {
+      docIds.forEach((id) => deleteDocument(subjectId, id));
+      dispatch({ type: "CLEAR_SELECTION" });
+    },
+    [subjectId]
   );
   const openUploadModal = useCallback(
     () => dispatch({ type: "OPEN_UPLOAD_MODAL" }),

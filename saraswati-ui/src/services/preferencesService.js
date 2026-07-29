@@ -1,4 +1,4 @@
-const STORAGE_KEY = "saraswati_preferences";
+import { storageManager } from "./storageManager";
 
 const DEFAULTS = {
   viewMode: "grid",
@@ -9,20 +9,12 @@ const DEFAULTS = {
 };
 
 function load() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? { ...DEFAULTS, ...JSON.parse(raw) } : { ...DEFAULTS };
-  } catch {
-    return { ...DEFAULTS };
-  }
+  const prefs = storageManager.getItem("preferences", {});
+  return { ...DEFAULTS, ...prefs };
 }
 
 function save(prefs) {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
-  } catch {
-    /* storage full or unavailable */
-  }
+  storageManager.setItem("preferences", prefs);
 }
 
 export function getPreference(key) {
