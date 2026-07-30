@@ -11,7 +11,7 @@ function EmptyState({ onNewFolder }) {
   muted
   playsInline
 >
-  <source src="/SARAS VID.mp4" type="video/mp4" />
+  <source src="/SARAS VID FINAL.mp4" type="video/mp4" />
   Your browser does not support the video tag.
 </video>
       <h2 className="mt-6 text-center text-[22px] font-semibold text-ink">
