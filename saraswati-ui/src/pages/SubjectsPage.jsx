@@ -15,7 +15,7 @@ function SubjectsPage() {
       <div className="flex flex-1 flex-col overflow-y-auto px-8 py-6">
         <FolderListContainer folders={subjects} onNewSubject={() => setCreateModalOpen(true)} />
       </div>
-      <FloatingActionButton onClick={() => setCreateModalOpen(true)} />
+      <FloatingActionButton />
       <CreateSubjectDialog isOpen={isCreateModalOpen} onClose={() => setCreateModalOpen(false)} />
     </div>
   );

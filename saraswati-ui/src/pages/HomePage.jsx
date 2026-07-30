@@ -1,7 +1,6 @@
 import { useState } from "react";
 import Navbar from "../components/navbar/Navbar";
 import EmptyState from "../components/home/EmptyState";
-import FloatingActionButton from "../components/shared/FloatingActionButton";
 import CreateSubjectDialog from "../components/folder/CreateSubjectDialog";
 
 function HomePage() {
@@ -13,7 +12,6 @@ function HomePage() {
       <div className="flex flex-1 flex-col overflow-y-auto px-8 py-6">
         <EmptyState onNewFolder={() => setCreateModalOpen(true)} />
       </div>
-      <FloatingActionButton onClick={() => setCreateModalOpen(true)} />
       <CreateSubjectDialog isOpen={isCreateModalOpen} onClose={() => setCreateModalOpen(false)} />
     </div>
   );

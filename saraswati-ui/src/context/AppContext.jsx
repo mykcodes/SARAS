@@ -9,6 +9,7 @@ const initialState = {
   preferences: getAllPreferences(),
   toasts: [],
   detailsDrawer: null,
+  isSettingsOpen: false,
 };
 
 function appReducer(state, action) {
@@ -45,6 +46,12 @@ function appReducer(state, action) {
 
     case "CLOSE_DETAILS_DRAWER":
       return { ...state, detailsDrawer: null };
+
+    case "OPEN_SETTINGS":
+      return { ...state, isSettingsOpen: true };
+
+    case "CLOSE_SETTINGS":
+      return { ...state, isSettingsOpen: false };
 
     default:
       return state;
@@ -94,6 +101,9 @@ export function AppProvider({ children }) {
     () => dispatch({ type: "CLOSE_DETAILS_DRAWER" }),
     []
   );
+
+  const openSettings = useCallback(() => dispatch({ type: "OPEN_SETTINGS" }), []);
+  const closeSettings = useCallback(() => dispatch({ type: "CLOSE_SETTINGS" }), []);
 
   const trackActivity = useCallback((action, target, metadata) => {
     logActivity(action, target, metadata);
@@ -157,6 +167,8 @@ export function AppProvider({ children }) {
       getRecentActivities,
       getTrashItems,
       getTrashCount,
+      openSettings,
+      closeSettings,
     }),
     [
       state,
@@ -173,6 +185,8 @@ export function AppProvider({ children }) {
       restoreFromTrash,
       permanentDeleteFromTrash,
       emptyAllTrash,
+      openSettings,
+      closeSettings,
     ]
   );
 

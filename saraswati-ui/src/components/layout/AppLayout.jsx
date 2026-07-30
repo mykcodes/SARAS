@@ -6,6 +6,7 @@ import GlobalSearchModal from "../search/GlobalSearchModal";
 import DocumentDetailsDrawer from "../documents/DocumentDetailsDrawer";
 import ToastContainer from "../shared/ToastContainer";
 import AISidePanel from "../ai/AISidePanel";
+import SettingsModal from "../settings/SettingsModal";
 
 function AppLayout() {
   return (
@@ -18,6 +19,7 @@ function AppLayout() {
           </div>
           <GlobalSearchModal />
           <DocumentDetailsDrawer />
+          <SettingsModal />
           <ToastContainer />
 
           {/* Global "Ask SARASWATI" slide-over — available on every route */}
