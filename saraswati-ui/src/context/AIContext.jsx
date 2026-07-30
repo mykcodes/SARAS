@@ -1,5 +1,4 @@
 import { createContext, useContext, useReducer, useCallback, useMemo } from "react";
-import { sendMessage as aiSendMessage } from "../services/aiService";
 
 // ---------------------------------------------------------------------------
 // State shape
@@ -89,22 +88,63 @@ const AIContext = createContext(null);
 export function AIProvider({ document, subjectId, children }) {
   const [state, dispatch] = useReducer(aiReducer, initialState);
 
+  // updated to take an optional requestedMarks parameter
   const sendUserMessage = useCallback(
-    async (text) => {
+    async (text, requestedMarks = null) => {
       dispatch({ type: "SEND_MESSAGE", text });
 
       try {
-        const response = await aiSendMessage(text, {
-          mode: state.contextMode,
-          documentId: document?.id,
-          subjectId,
+        const pdfResponse = await fetch('/thermo.pdf');
+        if (!pdfResponse.ok) {
+          throw new Error("Could not find thermo.pdf in the public folder.");
+        }
+        const pdfBlob = await pdfResponse.blob();
+        const pdfFile = new File([pdfBlob], "thermo.pdf", { type: "application/pdf" });
+
+        const formData = new FormData();
+        formData.append("file", pdfFile);
+        formData.append("question", text);
+        
+        // Only append marks if they are explicitly passed in
+        if (requestedMarks) {
+          formData.append("marks", requestedMarks.toString());
+        }
+
+        const response = await fetch("http://127.0.0.1:8000/ask-pdf", {
+          method: "POST",
+          body: formData,
         });
-        dispatch({ type: "RECEIVE_RESPONSE", message: response });
-      } catch {
-        dispatch({ type: "SET_THINKING", value: false });
+
+        if (!response.ok) {
+          throw new Error(`Backend returned status ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        dispatch({ 
+          type: "RECEIVE_RESPONSE", 
+          message: {
+            id: `msg-ai-${Date.now()}`,
+            role: "ai",
+            text: data.answer,
+            timestamp: new Date().toISOString(),
+          } 
+        });
+
+      } catch (error) {
+        console.error("SARASWATI Backend Error:", error);
+        dispatch({ 
+          type: "RECEIVE_RESPONSE", 
+          message: {
+            id: `msg-error-${Date.now()}`,
+            role: "ai",
+            text: "Error: Could not connect to the backend. Make sure your FastAPI server is running!",
+            timestamp: new Date().toISOString(),
+          } 
+        });
       }
     },
-    [state.contextMode, document?.id, subjectId]
+    [] 
   );
 
   const setContextMode = useCallback(
