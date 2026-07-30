@@ -1,7 +1,6 @@
 import { createContext, useContext, useReducer, useCallback, useMemo, useEffect } from "react";
-import { getDocumentsBySubjectId, favoriteDocument, deleteDocument } from "../services/documentService";
 import { getPreference, setPreference } from "../services/preferencesService";
-import { storageManager } from "../services/storageManager";
+import { listDocuments, deleteDocument as apiDeleteDocument } from "../api/documentApi";
 
 const initialState = {
   subjectId: null,
@@ -22,7 +21,7 @@ function workspaceReducer(state, action) {
       return {
         ...initialState,
         subjectId: action.subjectId,
-        documents: getDocumentsBySubjectId(action.subjectId),
+        documents: [],
         viewMode: getPreference("viewMode") || "grid",
         sortMode: getPreference("sortMode") || "newest",
       };
@@ -135,19 +134,34 @@ export function WorkspaceProvider({ subjectId, children }) {
   const [state, dispatch] = useReducer(workspaceReducer, {
     ...initialState,
     subjectId,
-    documents: getDocumentsBySubjectId(subjectId),
+    documents: [],
     viewMode: getPreference("viewMode") || "grid",
     sortMode: getPreference("sortMode") || "newest",
   });
 
+  // Load documents from the real API on mount / subjectId change
   useEffect(() => {
-    // Subscribe to documents collection
-    const unsubscribe = storageManager.subscribe("documents", () => {
-      const newDocs = getDocumentsBySubjectId(subjectId);
-      // We can dispatch an INIT_DOCS action, let's create one
-      dispatch({ type: "INIT_DOCS", documents: newDocs });
-    });
-    return () => unsubscribe();
+    if (!subjectId) return;
+    listDocuments(subjectId)
+      .then((docs) => {
+        const normalized = docs.map((d) => ({
+          id: d.id,
+          subjectId: d.subject_id,
+          title: d.title,
+          original_filename: d.original_filename,
+          type: "pdf",
+          size: null,
+          pages: d.page_count ?? null,
+          uploadedAt: d.upload_date,
+          processingStatus: d.processing_status,
+          embeddingStatus: d.processing_status,
+          favorite: false,
+        }));
+        dispatch({ type: "INIT_DOCS", documents: normalized });
+      })
+      .catch(() => {
+        // silently fail — workspace shows empty
+      });
   }, [subjectId]);
 
   const setSearchQuery = useCallback(
@@ -194,16 +208,20 @@ export function WorkspaceProvider({ subjectId, children }) {
     []
   );
   const removeDocument = useCallback(
-    (docId) => {
-      deleteDocument(subjectId, docId);
-      dispatch({ type: "DESELECT_DOCUMENT", docId });
+    async (docId) => {
+      try {
+        await apiDeleteDocument(subjectId, docId);
+      } catch (e) {
+        console.error('Failed to delete document:', e);
+      }
+      dispatch({ type: "REMOVE_DOCUMENT", docId });
     },
     [subjectId]
   );
   const removeDocuments = useCallback(
-    (docIds) => {
-      docIds.forEach((id) => deleteDocument(subjectId, id));
-      dispatch({ type: "CLEAR_SELECTION" });
+    async (docIds) => {
+      await Promise.allSettled(docIds.map((id) => apiDeleteDocument(subjectId, id)));
+      dispatch({ type: "REMOVE_DOCUMENTS", docIds });
     },
     [subjectId]
   );
