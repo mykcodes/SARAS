@@ -16,6 +16,7 @@ function mapSubjectToFrontend(s) {
     fileCount: s.file_count ?? 0, // map backend file_count -> frontend fileCount
     createdAt: s.created_at,      // map backend created_at -> frontend createdAt
     updatedAt: s.updated_at,      // map backend updated_at -> frontend updatedAt
+    isFavorite: s.is_favorite ?? false,
     tags: [],
     aiMeta: {},
   };
@@ -52,4 +53,9 @@ export function updateSubject(id, data) {
 /** DELETE /api/subjects/:id */
 export function deleteSubject(id) {
   return api.delete(`/api/subjects/${id}`);
+}
+
+/** PUT /api/subjects/:id/favorite */
+export function toggleSubjectFavorite(id) {
+  return api.put(`/api/subjects/${id}/favorite`).then(mapSubjectToFrontend);
 }

@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState } from "react";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
 import ErrorBoundary from "./components/shared/ErrorBoundary";
@@ -7,6 +7,7 @@ import SubjectsPage from "./pages/SubjectsPage";
 import SubjectWorkspacePage from "./pages/SubjectWorkspacePage";
 import DocumentPreviewPage from "./pages/DocumentPreviewPage";
 import Skeleton from "./components/shared/Skeleton";
+import StartupLoader from "./components/shared/StartupLoader";
 import { getSubjectById, getDocumentById } from "./lib/data";
 
 const RecentPage = lazy(() => import("./pages/RecentPage"));
@@ -98,9 +99,14 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
+  const [isStarted, setIsStarted] = useState(false);
+
   return (
     <ErrorBoundary>
-      <RouterProvider router={router} />
+      <StartupLoader onComplete={() => setIsStarted(true)} />
+      <div className={`h-screen w-full transition-opacity duration-1000 ${isStarted || sessionStorage.getItem("app_started") ? 'opacity-100' : 'opacity-0'}`}>
+        <RouterProvider router={router} />
+      </div>
     </ErrorBoundary>
   );
 }

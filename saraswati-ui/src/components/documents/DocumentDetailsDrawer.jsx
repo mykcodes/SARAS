@@ -1,4 +1,4 @@
-import { X, FileText, Calendar, HardDrive, FileStack, Clock, Sparkles, Tag } from "lucide-react";
+import { X, FileText, Calendar, HardDrive, FileStack, Clock, Sparkles, Tag, Star } from "lucide-react";
 import { useApp } from "../../context/AppContext";
 import { formatFileSize, formatDate, formatRelativeTime } from "../../lib/formatters";
 import { FILE_TYPE_LABELS } from "../../lib/utils";
@@ -13,23 +13,23 @@ function DocumentDetailsDrawer() {
   const doc = detailsDrawer;
 
   const metaRows = [
+    { icon: FileText, label: "Original File", value: doc.original_filename ?? doc.title },
     { icon: FileText, label: "Type", value: FILE_TYPE_LABELS[doc.type] ?? doc.type },
-    { icon: HardDrive, label: "Size", value: formatFileSize(doc.size) },
-    { icon: FileStack, label: "Pages", value: `${doc.pages} ${doc.pages === 1 ? "page" : "pages"}` },
+    { icon: HardDrive, label: "Size", value: doc.size ? formatFileSize(doc.size) : "Unknown" },
+    { icon: FileStack, label: "Pages", value: doc.pages ? `${doc.pages} ${doc.pages === 1 ? "page" : "pages"}` : "Calculating…" },
     { icon: Calendar, label: "Uploaded", value: formatDate(doc.uploadedAt) },
-    { icon: Calendar, label: "Modified", value: formatDate(doc.updatedAt) },
-    { icon: Clock, label: "Last Opened", value: doc.lastOpened ? formatRelativeTime(doc.lastOpened) : "Never" },
+    { icon: Calendar, label: "Modified", value: formatDate(doc.updatedAt ?? doc.uploadedAt) },
   ];
 
-  const aiStatusLabel = doc.embeddingStatus === "complete"
+  const aiStatusLabel = doc.processingStatus === "complete"
     ? "Complete"
-    : doc.embeddingStatus === "processing"
+    : doc.processingStatus === "processing"
       ? "Processing…"
       : "Pending";
 
-  const aiStatusColor = doc.embeddingStatus === "complete"
+  const aiStatusColor = doc.processingStatus === "complete"
     ? "text-emerald-400"
-    : doc.embeddingStatus === "processing"
+    : doc.processingStatus === "processing"
       ? "text-gold"
       : "text-ink-faint";
 
@@ -54,8 +54,13 @@ function DocumentDetailsDrawer() {
           <div className="flex items-start gap-3">
             <FileTypeIcon type={doc.type} size={22} />
             <div className="min-w-0">
-              <p className="text-[15px] font-medium text-ink">{doc.title}</p>
-              <p className="mt-0.5 text-[12px] text-ink-soft">{doc.subjectId}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-[15px] font-medium text-ink">{doc.title}</p>
+                {doc.favorite && (
+                  <Star size={14} className="shrink-0 text-gold" fill="currentColor" />
+                )}
+              </div>
+              <p className="mt-0.5 text-[12px] text-ink-soft">Document ID: {doc.id}</p>
             </div>
           </div>
 
@@ -77,27 +82,6 @@ function DocumentDetailsDrawer() {
             })}
           </div>
 
-          <div className="flex flex-col gap-3 rounded-lg border border-border-subtle bg-surface p-4">
-            <span className="text-[11px] font-medium uppercase tracking-wider text-ink-faint">
-              AI Status
-            </span>
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-[12.5px] text-ink-soft">
-                <Sparkles size={13} className="text-ink-faint" />
-                Embedding
-              </span>
-              <span className={`text-[12.5px] ${aiStatusColor}`}>{aiStatusLabel}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-2 text-[12.5px] text-ink-soft">
-                <Sparkles size={13} className="text-ink-faint" />
-                Indexed
-              </span>
-              <span className={`text-[12.5px] ${doc.indexed ? "text-emerald-400" : "text-ink-faint"}`}>
-                {doc.indexed ? "Yes" : "No"}
-              </span>
-            </div>
-          </div>
 
           <div className="flex flex-col gap-3 rounded-lg border border-border-subtle bg-surface p-4">
             <span className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-ink-faint">
@@ -105,15 +89,6 @@ function DocumentDetailsDrawer() {
               Tags
             </span>
             <TagInput itemType="document" itemId={doc.id} />
-          </div>
-
-          <div className="flex flex-col gap-3 rounded-lg border border-border-subtle bg-surface p-4">
-            <span className="text-[11px] font-medium uppercase tracking-wider text-ink-faint">
-              Summary
-            </span>
-            <p className="text-[12px] leading-relaxed text-ink-faint">
-              AI-generated summary will appear here once the document is fully indexed.
-            </p>
           </div>
         </div>
       </aside>

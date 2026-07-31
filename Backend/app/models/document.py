@@ -48,6 +48,9 @@ class Document(Base):
     upload_status: Mapped[str] = mapped_column(
         String(50), default="pending", nullable=False, index=True
     )
+    is_favorite: Mapped[bool] = mapped_column(
+        default=False, nullable=False
+    )
 
     # -- Timestamps ------------------------------------------------------------
     uploaded_at: Mapped[datetime] = mapped_column(

@@ -9,23 +9,25 @@
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8000';
 
-function getToken() {
-  return localStorage.getItem('saraswati_token');
-}
-
 async function request(method, path, body, options = {}) {
-  const token = getToken();
-  const headers = {
-    ...(body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...options.headers,
-  };
+  // 1. Use native Headers API to prevent object spreading override bugs
+  const headers = new Headers(options.headers || {});
+
+  // 2. Safely attach Content-Type
+  if (!(body instanceof FormData)) {
+    if (!headers.has('Content-Type')) {
+      headers.set('Content-Type', 'application/json');
+    }
+  }
+
+  // 4. Extract headers out of options so it does not overwrite the carefully constructed Headers instance
+  const { headers: _discardedHeaders, ...restOptions } = options;
 
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
     headers,
     body: body instanceof FormData ? body : body ? JSON.stringify(body) : undefined,
-    ...options,
+    ...restOptions,
   });
 
   if (res.status === 204) return null;

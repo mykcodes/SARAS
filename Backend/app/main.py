@@ -18,10 +18,11 @@ import app.models.document  # noqa: F401
 import app.models.chat      # noqa: F401
 import app.models.message   # noqa: F401
 
-from app.api.auth import router as auth_router
 from app.api.subjects import router as subjects_router
 from app.api.documents import router as documents_router
 from app.api.chat import router as chat_router
+from app.api.favorites import router as favorites_router
+from app.api.storage import router as storage_router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -54,10 +55,11 @@ app.add_middleware(
 )
 
 # ── Routers ───────────────────────────────────────────────────────────────────
-app.include_router(auth_router)
 app.include_router(subjects_router)
 app.include_router(documents_router)
 app.include_router(chat_router)
+app.include_router(favorites_router)
+app.include_router(storage_router)
 
 
 @app.get("/health")

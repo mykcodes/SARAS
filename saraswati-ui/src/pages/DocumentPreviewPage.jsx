@@ -61,7 +61,7 @@ function DocumentPreviewPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
+    <div className="flex h-screen flex-col overflow-hidden">
       <Navbar title={document.title} />
       <Breadcrumb />
       <DocumentPreviewShell document={document} subjectId={subjectId} />

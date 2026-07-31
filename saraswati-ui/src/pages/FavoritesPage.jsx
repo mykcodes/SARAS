@@ -1,12 +1,12 @@
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import Navbar from "../components/navbar/Navbar";
 import FolderCard from "../components/folder/FolderCard";
-import { SUBJECTS, DOCUMENTS } from "../lib/data";
 import FileTypeIcon from "../components/documents/FileTypeIcon";
 import { formatFileSize, formatRelativeTime } from "../lib/formatters";
 import { FILE_TYPE_LABELS } from "../lib/utils";
+import { getFavorites } from "../api/favoritesApi";
 
 const TABS = [
   { key: "all", label: "All" },
@@ -16,21 +16,31 @@ const TABS = [
 
 function FavoritesPage() {
   const [activeTab, setActiveTab] = useState("all");
+  const [favoriteDocuments, setFavoriteDocuments] = useState([]);
+  const [favoriteSubjects, setFavoriteSubjects] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const favoriteDocuments = useMemo(() => {
-    const results = [];
-    for (const [subjectId, docs] of Object.entries(DOCUMENTS)) {
-      for (const doc of docs) {
-        if (doc.favorite) {
-          results.push({ ...doc, subjectId });
-        }
-      }
-    }
-    return results;
-  }, []);
-
-  const favoriteSubjects = useMemo(() => {
-    return SUBJECTS.filter((s) => s.favorite);
+  useEffect(() => {
+    getFavorites()
+      .then((data) => {
+        // Normalize documents
+        const docs = (data.documents || []).map((d) => ({
+          id: d.id,
+          subjectId: d.subject_id,
+          title: d.title,
+          original_filename: d.original_filename,
+          type: "pdf",
+          size: d.file_size,
+          pages: d.page_count ?? null,
+          uploadedAt: d.upload_date,
+          processingStatus: d.processing_status,
+          favorite: d.is_favorite,
+        }));
+        setFavoriteDocuments(docs);
+        setFavoriteSubjects(data.subjects || []);
+      })
+      .catch((err) => console.error("Failed to fetch favorites", err))
+      .finally(() => setIsLoading(false));
   }, []);
 
   const showDocs = activeTab === "all" || activeTab === "documents";
@@ -57,7 +67,11 @@ function FavoritesPage() {
           ))}
         </div>
 
-        {favoriteDocuments.length === 0 && favoriteSubjects.length === 0 ? (
+        {isLoading ? (
+          <div className="flex flex-1 items-center justify-center">
+            <div className="text-sm text-ink-faint">Loading favorites...</div>
+          </div>
+        ) : favoriteDocuments.length === 0 && favoriteSubjects.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3">
             <span className="flex h-16 w-16 items-center justify-center rounded-full border border-border-subtle bg-surface-soft">
               <Star size={28} strokeWidth={1.4} className="text-ink-faint" />

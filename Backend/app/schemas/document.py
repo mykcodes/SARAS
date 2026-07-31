@@ -20,6 +20,7 @@ class DocumentOut(BaseModel):
     filename: str
     file_path: str
     file_size: int
+    is_favorite: bool = False
     processing_status: str = Field(validation_alias="upload_status")
     page_count: int | None = Field(None, validation_alias="total_pages")
     upload_date: datetime = Field(validation_alias="uploaded_at")

@@ -8,8 +8,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
-from app.auth.dependencies import get_current_user
-from app.auth.jwt import decode_access_token
+from app.dependencies import get_current_user
 from app.models.user import User
 from app.models.document import Document
 from app.schemas.document import DocumentOut, DocumentStatusOut
@@ -178,31 +177,10 @@ def serve_pdf(
     subject_id: int,
     doc_id: int,
     db: Session = Depends(get_db),
-    token: Optional[str] = Query(None),
+    current_user: User = Depends(get_current_user),
 ):
-    """Serve the raw PDF file for inline viewing.
-
-    Accepts authentication via ?token= query param.
-    This is required because browsers loading PDFs via URL cannot set custom headers.
-    """
-    if not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token query parameter is required to view this PDF",
-        )
-
-    user_id = decode_access_token(token)
-    if user_id is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-        )
-
-    user = db.get(User, user_id)
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
-
-    _get_subject_or_404(db, subject_id, user.id)
+    """Serve the raw PDF file for inline viewing."""
+    _get_subject_or_404(db, subject_id, current_user.id)
     doc = _get_doc_or_404(db, doc_id, subject_id)
 
     if not os.path.exists(doc.file_path):
@@ -214,6 +192,34 @@ def serve_pdf(
         filename=doc.original_filename,
         headers={"Content-Disposition": "inline"},
     )
+
+from pydantic import BaseModel
+class DocumentUpdate(BaseModel):
+    title: str
+
+@router.put("/{doc_id}", response_model=DocumentOut)
+def update_doc(
+    subject_id: int,
+    doc_id: int,
+    data: DocumentUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    _get_subject_or_404(db, subject_id, current_user.id)
+    doc = _get_doc_or_404(db, doc_id, subject_id)
+    
+    ext = ""
+    if "." in doc.original_filename:
+        ext = doc.original_filename[doc.original_filename.rfind("."):]
+    
+    new_name = data.title.strip()
+    if not new_name.endswith(ext):
+        new_name += ext
+        
+    doc.original_filename = new_name
+    db.commit()
+    db.refresh(doc)
+    return DocumentOut.model_validate(doc)
 
 
 @router.delete("/{doc_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -234,3 +240,19 @@ def delete_doc(
         pass  # Don't block deletion if ChromaDB fails
 
     delete_document(db, doc)
+
+
+@router.put("/{doc_id}/favorite", response_model=DocumentOut)
+def toggle_favorite(
+    subject_id: int,
+    doc_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    _get_subject_or_404(db, subject_id, current_user.id)
+    doc = _get_doc_or_404(db, doc_id, subject_id)
+    
+    doc.is_favorite = not doc.is_favorite
+    db.commit()
+    db.refresh(doc)
+    return DocumentOut.model_validate(doc)

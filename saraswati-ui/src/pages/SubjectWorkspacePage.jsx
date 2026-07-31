@@ -20,7 +20,7 @@ import { WorkspaceProvider, useWorkspace } from "../context/WorkspaceContext";
 import { useApp } from "../context/AppContext";
 
 function WorkspaceContent({ subject }) {
-  const { viewMode, searchQuery, activeFilter, hasSelection, contextMenu, closeContextMenu, toggleFavorite, removeDocument, subjectId } = useWorkspace();
+  const { viewMode, searchQuery, activeFilter, hasSelection, contextMenu, closeContextMenu, toggleFavorite, updateDocumentTitle, removeDocument, subjectId } = useWorkspace();
   const { trashDocument, openDetailsDrawer, addToast, trackActivity } = useApp();
   const { documents, isEmpty, totalCount, filteredCount } = useDocuments();
   const { clearSelection } = useWorkspace();
@@ -48,20 +48,33 @@ function WorkspaceContent({ subject }) {
         trashDocument({ ...doc, subjectId });
         removeDocument(doc.id);
         break;
-      case "download":
+      case "download": {
         addToast(`Downloading "${doc.title}"…`, "info");
+        import("../api/documentApi").then(({ getDocumentFileUrl }) => {
+          const url = getDocumentFileUrl(subjectId, doc.id);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = doc.title;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+        });
         break;
-      case "move":
-        addToast(`Move "${doc.title}" — coming soon`, "info");
-        break;
-      case "bookmark":
-        {
-          import("../services/bookmarkService").then(({ toggleBookmark }) => {
-            const isNowBookmarked = toggleBookmark({ documentId: doc.id, subjectId, type: "document", title: doc.title });
-            addToast(`"${doc.title}" ${isNowBookmarked ? "added to bookmarks" : "removed from bookmarks"}`, "success");
+      }
+      case "rename": {
+        const newName = window.prompt("Enter new document name:", doc.title);
+        if (newName && newName.trim() && newName.trim() !== doc.title) {
+          import("../api/documentApi").then(({ updateDocument }) => {
+            updateDocument(subjectId, doc.id, { title: newName.trim() })
+              .then(() => {
+                addToast(`Renamed to "${newName.trim()}"`, "success");
+                updateDocumentTitle(doc.id, newName.trim());
+              })
+              .catch(() => addToast("Failed to rename document", "error"));
           });
         }
         break;
+      }
       default:
         break;
     }
@@ -129,13 +142,11 @@ function SubjectWorkspacePage() {
         <SubjectNotFound />
       ) : (
         <WorkspaceProvider subjectId={subjectId}>
-          <div className="flex flex-1 flex-col gap-6 overflow-y-auto px-8 py-6">
+          <div className="flex flex-1 flex-col gap-6 px-8 py-6">
             <WorkspaceContent subject={subject} />
           </div>
         </WorkspaceProvider>
       )}
-
-      {!notFound && <FloatingActionButton />}
     </div>
   );
 }

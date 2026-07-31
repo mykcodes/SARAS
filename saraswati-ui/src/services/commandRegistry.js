@@ -53,7 +53,7 @@ export const ACTIONS = [
     description: "Compare content across multiple documents",
     icon: "GitCompare",
     category: "ai",
-    disabled: true,
+    disabled: false,
   },
   {
     id: "mindmap",
@@ -61,7 +61,7 @@ export const ACTIONS = [
     description: "Generate a visual mind map of concepts",
     icon: "Network",
     category: "ai",
-    disabled: true,
+    disabled: false,
   },
   {
     id: "formulae",

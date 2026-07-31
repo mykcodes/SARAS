@@ -9,7 +9,7 @@ function HomePage() {
   return (
     <div className="relative flex flex-1 flex-col">
       <Navbar title="Home" />
-      <div className="flex flex-1 flex-col overflow-y-auto px-8 py-6">
+      <div className="flex flex-1 flex-col px-8 py-6">
         <EmptyState onNewFolder={() => setCreateModalOpen(true)} />
       </div>
       <CreateSubjectDialog isOpen={isCreateModalOpen} onClose={() => setCreateModalOpen(false)} />

@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { listSubjects, createSubject as apiCreateSubject, updateSubject as apiUpdateSubject, deleteSubject as apiDeleteSubject } from "../api/subjectApi";
-import { favoriteSubject as apiFavoriteSubject } from "../services/subjectService"; // Keep this local for now or update if needed
+import { listSubjects, createSubject as apiCreateSubject, updateSubject as apiUpdateSubject, deleteSubject as apiDeleteSubject, toggleSubjectFavorite } from "../api/subjectApi";
 
 function useSubjects() {
   const [subjects, setSubjects] = useState([]);
@@ -40,10 +39,11 @@ function useSubjects() {
   }, []);
 
   const toggleFavorite = useCallback((id) => {
-    // API does not currently have favorites. 
-    // If favoriteSubject is used, fallback to local implementation
-    // Wait, the API doesn't support favorite. For now just use the mock or ignore
-    return apiFavoriteSubject(id);
+    setSubjects((prev) => prev.map((s) => s.id === id ? { ...s, isFavorite: !s.isFavorite } : s));
+    toggleSubjectFavorite(id).catch(err => {
+      console.error("Failed to toggle favorite", err);
+      setSubjects((prev) => prev.map((s) => s.id === id ? { ...s, isFavorite: !s.isFavorite } : s));
+    });
   }, []);
 
   return {

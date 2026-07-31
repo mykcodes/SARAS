@@ -1,5 +1,7 @@
 import CitationCard from "./CitationCard";
 import { formatRelativeTime } from "../../lib/formatters";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 /**
  * Renders a single message in the AI conversation.
@@ -37,18 +39,24 @@ function AIMessage({ message }) {
 
           {/* Message bubble */}
           <div
-            className={`rounded-xl px-3.5 py-2.5 text-[12.5px] leading-relaxed ${
+            className={`rounded-xl px-3.5 py-2.5 text-[13px] leading-relaxed ${
               isUser
                 ? "bg-surface-hover text-ink"
-                : "border border-border-subtle bg-surface text-ink-soft"
+                : "border border-border-subtle bg-surface text-ink-soft prose prose-invert prose-sm max-w-none prose-p:my-1 prose-headings:my-2 prose-ul:my-1 prose-li:my-0.5 prose-a:text-gold"
             }`}
           >
-            {renderMarkdownLite(message.text)}
+            {isUser ? (
+              message.text
+            ) : (
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {message.text}
+              </ReactMarkdown>
+            )}
           </div>
 
           {/* Citations (AI only) */}
           {!isUser && message.citations && message.citations.length > 0 && (
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-1.5 mt-2">
               <span className="text-[10.5px] font-medium uppercase tracking-wider text-ink-faint">
                 Sources
               </span>
@@ -66,52 +74,6 @@ function AIMessage({ message }) {
       </div>
     </div>
   );
-}
-
-/**
- * Lightweight markdown-like renderer for AI responses.
- * Handles bold (**text**), bullet points, and numbered lists
- * without pulling in a full markdown library.
- */
-function renderMarkdownLite(text) {
-  if (!text) return null;
-
-  const lines = text.split("\n");
-  const elements = [];
-  let key = 0;
-
-  for (const line of lines) {
-    if (line.trim() === "") {
-      elements.push(<br key={key++} />);
-      continue;
-    }
-
-    // Process inline bold
-    const processed = line.split(/(\*\*[^*]+\*\*)/g).map((part, i) => {
-      if (part.startsWith("**") && part.endsWith("**")) {
-        return (
-          <strong key={i} className="font-semibold text-ink">
-            {part.slice(2, -2)}
-          </strong>
-        );
-      }
-      // Process inline italic
-      return part.split(/(\*[^*]+\*)/g).map((sub, j) => {
-        if (sub.startsWith("*") && sub.endsWith("*")) {
-          return <em key={`${i}-${j}`} className="italic text-ink-soft">{sub.slice(1, -1)}</em>;
-        }
-        return sub;
-      });
-    });
-
-    elements.push(
-      <span key={key++} className="block">
-        {processed}
-      </span>
-    );
-  }
-
-  return <>{elements}</>;
 }
 
 export default AIMessage;

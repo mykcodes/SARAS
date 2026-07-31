@@ -19,30 +19,8 @@ const DocumentCard = memo(function DocumentCard({ document, subjectId }) {
   const tags = getTagsForItem("document", document.id);
 
   const handleAction = (actionId) => {
-    switch (actionId) {
-      case "open":
-        trackActivity("opened", document.title, { targetType: "document", subjectId, documentId: document.id });
-        navigate(`/subjects/${subjectId}/documents/${document.id}`);
-        break;
-      case "delete":
-        trashDocument({ ...document, subjectId });
-        removeDocument(document.id);
-        break;
-      case "details":
-        openDetailsDrawer({ ...document, subjectId });
-        break;
-      case "download":
-        addToast(`Downloading "${document.title}"…`, "info");
-        break;
-      case "move":
-        addToast(`Move "${document.title}" — coming soon`, "info");
-        break;
-      case "rename":
-        addToast(`Rename — coming soon`, "info");
-        break;
-      default:
-        break;
-    }
+    // Actions are now handled by the global context menu logic in SubjectWorkspacePage
+    openContextMenu(document.id, 0, 0); // fallback if ever called directly
   };
 
   const handleClick = (e) => {
@@ -151,12 +129,6 @@ const DocumentCard = memo(function DocumentCard({ document, subjectId }) {
         <span>{formatRelativeTime(document.uploadedAt)}</span>
       </div>
 
-      <div className="flex items-center gap-1.5">
-        <Sparkles size={11} className={document.indexed ? "text-gold" : "text-ink-faint"} />
-        <span className={`text-[10.5px] ${document.indexed ? "text-gold" : "text-ink-faint"}`}>
-          {document.indexed ? "AI Indexed" : "Not Indexed"}
-        </span>
-      </div>
     </Link>
   );
 });

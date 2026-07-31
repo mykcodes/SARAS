@@ -19,10 +19,8 @@ export async function uploadDocument(subjectId, file, onProgress) {
 
   // Use XHR for progress support
   return new Promise((resolve, reject) => {
-    const token = localStorage.getItem('saraswati_token');
     const xhr = new XMLHttpRequest();
     xhr.open('POST', `${BASE_URL}/api/subjects/${subjectId}/documents`);
-    if (token) xhr.setRequestHeader('Authorization', `Bearer ${token}`);
 
     if (onProgress) {
       xhr.upload.onprogress = (e) => {
@@ -68,13 +66,20 @@ export function deleteDocument(subjectId, docId) {
   return api.delete(`/api/subjects/${subjectId}/documents/${docId}`);
 }
 
+/** PUT /api/subjects/:subjectId/documents/:docId/favorite */
+export function toggleDocumentFavorite(subjectId, docId) {
+  return api.put(`/api/subjects/${subjectId}/documents/${docId}/favorite`);
+}
+
 /**
  * Returns the URL to serve the PDF inline.
  * Used as the `file` prop for PDFViewer.
  */
 export function getDocumentFileUrl(subjectId, docId) {
-  const token = localStorage.getItem('saraswati_token');
-  // We construct a URL with a token query param as PDFViewer can't set custom headers.
-  // The backend will be updated to accept ?token= for PDF serving.
-  return `${BASE_URL}/api/subjects/${subjectId}/documents/${docId}/file?token=${token ?? ''}`;
+  return `${BASE_URL}/api/subjects/${subjectId}/documents/${docId}/file`;
+}
+
+/** PUT /api/subjects/:subjectId/documents/:docId */
+export function updateDocument(subjectId, docId, data) {
+  return api.put(`/api/subjects/${subjectId}/documents/${docId}`, data);
 }

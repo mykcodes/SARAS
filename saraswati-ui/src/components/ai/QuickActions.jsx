@@ -24,6 +24,18 @@ const ICON_MAP = {
   BookOpen,
 };
 
+const PROMPT_MAP = {
+  summarize: "Summarize the key concepts from the uploaded documents",
+  flashcards: "Generate flashcards from the uploaded documents",
+  quiz: "Create a practice quiz based on the uploaded documents",
+  explain: "Explain the most difficult concepts from the uploaded documents",
+  topics: "List the most important topics covered in the uploaded documents",
+  compare: "Compare and contrast the main ideas in the uploaded documents",
+  mindmap: "Create a text-based mind map of the key topics from the uploaded documents",
+  formulae: "Extract all formulas and equations from the uploaded documents",
+  definitions: "Extract all key definitions from the uploaded documents",
+};
+
 /**
  * Grid of intelligent shortcut actions displayed in the welcome state.
  * Pulls from the central command registry so future command palette
@@ -36,7 +48,8 @@ function QuickActions() {
 
   const handleAction = (action) => {
     if (action.disabled) return;
-    sendUserMessage(action.label);
+    const prompt = PROMPT_MAP[action.id] || action.label;
+    sendUserMessage(prompt);
   };
 
   return (

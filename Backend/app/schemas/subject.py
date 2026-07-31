@@ -28,7 +28,9 @@ class SubjectOut(BaseModel):
     name: str
     description: str | None
     color: str = "#D9A441"
+    is_favorite: bool = False
     file_count: int = 0
+    storage_used: int = 0
     created_at: datetime
     updated_at: datetime
 

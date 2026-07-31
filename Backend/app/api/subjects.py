@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database.session import get_db
-from app.auth.dependencies import get_current_user
+from app.dependencies import get_current_user
 from app.models.user import User
 from app.schemas.subject import SubjectCreate, SubjectUpdate, SubjectOut
 from app.services.subject_service import (
@@ -21,9 +21,10 @@ router = APIRouter(prefix="/api/subjects", tags=["subjects"])
 
 
 def _to_out(subject) -> SubjectOut:
-    """Convert ORM Subject → SubjectOut (adds file_count)."""
+    """Convert ORM Subject → SubjectOut (adds file_count and storage_used)."""
     data = SubjectOut.model_validate(subject)
     data.file_count = len(subject.documents)
+    data.storage_used = sum(d.file_size for d in subject.documents) if subject.documents else 0
     return data
 
 
@@ -81,3 +82,16 @@ def delete(
 ):
     subject = _get_or_404(db, subject_id, current_user.id)
     delete_subject(db, subject)
+
+
+@router.put("/{subject_id}/favorite", response_model=SubjectOut)
+def toggle_favorite(
+    subject_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    subject = _get_or_404(db, subject_id, current_user.id)
+    subject.is_favorite = not subject.is_favorite
+    db.commit()
+    db.refresh(subject)
+    return _to_out(subject)

@@ -59,6 +59,13 @@ function workspaceReducer(state, action) {
     case "ADD_DOCUMENT":
       return { ...state, documents: [action.document, ...state.documents] };
 
+    case "UPDATE_DOCUMENT_TITLE": {
+      const docs = state.documents.map((doc) =>
+        doc.id === action.docId ? { ...doc, title: action.title } : doc
+      );
+      return { ...state, documents: docs };
+    }
+
     case "REMOVE_DOCUMENT":
       return {
         ...state,
@@ -150,12 +157,12 @@ export function WorkspaceProvider({ subjectId, children }) {
           title: d.title,
           original_filename: d.original_filename,
           type: "pdf",
-          size: null,
+          size: d.file_size,
           pages: d.page_count ?? null,
           uploadedAt: d.upload_date,
           processingStatus: d.processing_status,
           embeddingStatus: d.processing_status,
-          favorite: false,
+          favorite: d.is_favorite ?? false,
         }));
         dispatch({ type: "INIT_DOCS", documents: normalized });
       })
@@ -188,8 +195,13 @@ export function WorkspaceProvider({ subjectId, children }) {
   );
   const toggleFavorite = useCallback(
     (docId) => {
-      favoriteDocument(subjectId, docId);
-      // Let the subscription handle the state update
+      import("../api/documentApi").then(({ toggleDocumentFavorite }) => {
+        toggleDocumentFavorite(subjectId, docId).catch((err) => {
+          console.error("Failed to toggle favorite", err);
+          dispatch({ type: "TOGGLE_FAVORITE", docId }); // Revert on failure
+        });
+      });
+      dispatch({ type: "TOGGLE_FAVORITE", docId }); // Optimistic update
     },
     [subjectId]
   );
@@ -205,6 +217,10 @@ export function WorkspaceProvider({ subjectId, children }) {
       // documentService handles adding, this might be called for optimisitic updates
       dispatch({ type: "ADD_DOCUMENT", document });
     },
+    []
+  );
+  const updateDocumentTitle = useCallback(
+    (docId, title) => dispatch({ type: "UPDATE_DOCUMENT_TITLE", docId, title }),
     []
   );
   const removeDocument = useCallback(
@@ -281,6 +297,7 @@ export function WorkspaceProvider({ subjectId, children }) {
       toggleFavorite,
       bulkFavorite,
       addDocument,
+      updateDocumentTitle,
       removeDocument,
       removeDocuments,
       openUploadModal,
@@ -305,6 +322,7 @@ export function WorkspaceProvider({ subjectId, children }) {
       toggleFavorite,
       bulkFavorite,
       addDocument,
+      updateDocumentTitle,
       removeDocument,
       removeDocuments,
       openUploadModal,

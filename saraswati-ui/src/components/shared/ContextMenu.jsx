@@ -1,17 +1,16 @@
 import { useEffect, useRef } from "react";
-import { ExternalLink, Star, Bookmark, FolderInput, Download, Trash2, Info } from "lucide-react";
+import { ExternalLink, Star, FolderInput, Download, Trash2, Info } from "lucide-react";
 
 const MENU_ITEMS = [
   { id: "open", label: "Open", icon: ExternalLink },
   { id: "favorite", label: "Toggle Favorite", icon: Star },
-  { id: "bookmark", label: "Bookmark", icon: Bookmark },
+  { id: "rename", label: "Rename", icon: FolderInput },
   { id: "details", label: "Details", icon: Info },
   { id: "download", label: "Download", icon: Download },
-  { id: "move", label: "Move to…", icon: FolderInput },
   { id: "delete", label: "Delete", icon: Trash2, danger: true },
 ];
 
-function ContextMenu({ x, y, onAction, onClose }) {
+function ContextMenu({ x, y, onAction, onClose, items = MENU_ITEMS }) {
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -32,7 +31,7 @@ function ContextMenu({ x, y, onAction, onClose }) {
   }, [onClose]);
 
   const adjustedX = Math.min(x, window.innerWidth - 180);
-  const adjustedY = Math.min(y, window.innerHeight - MENU_ITEMS.length * 36 - 20);
+  const adjustedY = Math.min(y, window.innerHeight - items.length * 36 - 20);
 
   return (
     <div
@@ -40,7 +39,7 @@ function ContextMenu({ x, y, onAction, onClose }) {
       className="fixed z-[60] min-w-[170px] rounded-lg border border-border-subtle bg-surface-soft py-1 shadow-xl modal-content"
       style={{ left: adjustedX, top: adjustedY }}
     >
-      {MENU_ITEMS.map((item) => {
+      {items.map((item) => {
         const Icon = item.icon;
         return (
           <button

@@ -4,8 +4,9 @@ import Logo from "./Logo";
 import SidebarItem from "./SidebarItem";
 import StorageCard from "./StorageCard";
 import ProfileCard from "./ProfileCard";
-import { NAV_ITEMS, USER, STORAGE } from "../../lib/data";
+import { NAV_ITEMS } from "../../lib/data";
 import { useApp } from "../../context/AppContext";
+import { getStorageMetrics } from "../../api/storageApi";
 
 const ICONS = {
   home: Home,
@@ -15,18 +16,49 @@ const ICONS = {
   trash: Trash2,
 };
 
+// Format bytes according to specific rules: MB if < 1GB, else GB.
+function formatUsedBytes(bytes) {
+  if (bytes === 0) return { value: 0, unit: "MB" };
+  const gb = 1024 * 1024 * 1024;
+  const mb = 1024 * 1024;
+  if (bytes < gb) {
+    return { value: parseFloat((bytes / mb).toFixed(2)), unit: "MB" };
+  }
+  return { value: parseFloat((bytes / gb).toFixed(2)), unit: "GB" };
+}
+
 function Sidebar() {
   const { openSettings } = useApp();
   const [isCollapsed, setIsCollapsed] = useState(() => {
     return localStorage.getItem("sidebarCollapsed") === "true";
   });
+  
+  const [name, setName] = useState(() => localStorage.getItem("userName") || "Saraswati User");
+  // Total is strictly 5 GB internally for percentages
+  const [storage, setStorage] = useState({ used: 0, total: 5 * 1024 * 1024 * 1024 });
 
   useEffect(() => {
     localStorage.setItem("sidebarCollapsed", isCollapsed);
   }, [isCollapsed]);
+  
+  useEffect(() => {
+    getStorageMetrics().then((data) => {
+      if (data) {
+        setStorage({ used: data.used_bytes, total: 5 * 1024 * 1024 * 1024 }); // Total is always 5GB
+      }
+    }).catch(() => {});
+  }, []);
+
+  const role = "Student";
+  const initial = name.charAt(0).toUpperCase();
+  
+  const formattedUsed = formatUsedBytes(storage.used);
+  // Total is always 5 GB
+  const totalValue = 5;
+  const totalUnit = "GB";
 
   return (
-    <aside className={`relative flex h-full shrink-0 flex-col border-r border-border-subtle bg-bg-elevated py-5 transition-all duration-300 ${isCollapsed ? "w-[80px] px-2" : "w-[248px] px-4"}`}>
+    <aside className={`sticky top-0 h-screen shrink-0 flex-col border-r border-border-subtle bg-bg-elevated py-5 transition-all duration-300 flex ${isCollapsed ? "w-[80px] px-2" : "w-[248px] px-4"}`}>
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
         className="absolute -right-3 top-6 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-border-subtle bg-surface text-ink-soft shadow-sm transition-colors hover:text-ink"
@@ -51,10 +83,17 @@ function Sidebar() {
 
       <div className="flex flex-col gap-4">
         <SidebarItem icon={Settings} label="Settings" isCollapsed={isCollapsed} onClick={openSettings} />
+        
         <div className="border-t border-border-subtle pt-4">
-          <StorageCard used={STORAGE.used} total={STORAGE.total} unit={STORAGE.unit} isCollapsed={isCollapsed} />
+          <StorageCard
+            used={formattedUsed.value}
+            usedUnit={formattedUsed.unit}
+            total={totalValue}
+            totalUnit={totalUnit}
+            isCollapsed={isCollapsed}
+          />
         </div>
-        <ProfileCard name={USER.name} role={USER.role} initial={USER.initial} isCollapsed={isCollapsed} />
+        <ProfileCard name={name} role={role} initial={initial} isCollapsed={isCollapsed} onNameChange={setName} />
       </div>
     </aside>
   );

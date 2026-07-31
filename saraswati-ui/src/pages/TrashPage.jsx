@@ -80,15 +80,6 @@ function TrashPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => handleRestore(item.trashId)}
-                  className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11.5px] text-ink-soft transition-colors hover:bg-surface-hover hover:text-ink"
-                  title="Restore"
-                >
-                  <RotateCcw size={13} />
-                  Restore
-                </button>
-                <button
-                  type="button"
                   onClick={() => handlePermanentDelete(item.trashId)}
                   className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-[11.5px] text-red-400 transition-colors hover:bg-red-500/10 hover:text-red-300"
                   title="Permanently delete"

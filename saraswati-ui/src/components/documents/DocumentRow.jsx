@@ -16,30 +16,8 @@ const DocumentRow = memo(function DocumentRow({ document, subjectId }) {
   const isSelected = selectedDocIds.includes(document.id);
 
   const handleAction = (actionId) => {
-    switch (actionId) {
-      case "open":
-        trackActivity("opened", document.title, { targetType: "document", subjectId, documentId: document.id });
-        navigate(`/subjects/${subjectId}/documents/${document.id}`);
-        break;
-      case "delete":
-        trashDocument({ ...document, subjectId });
-        removeDocument(document.id);
-        break;
-      case "details":
-        openDetailsDrawer({ ...document, subjectId });
-        break;
-      case "download":
-        addToast(`Downloading "${document.title}"…`, "info");
-        break;
-      case "move":
-        addToast(`Move "${document.title}" — coming soon`, "info");
-        break;
-      case "rename":
-        addToast(`Rename — coming soon`, "info");
-        break;
-      default:
-        break;
-    }
+    // Actions are now handled by the global context menu logic in SubjectWorkspacePage
+    openContextMenu(document.id, 0, 0); // fallback if ever called directly
   };
 
   const handleClick = (e) => {
@@ -121,12 +99,7 @@ const DocumentRow = memo(function DocumentRow({ document, subjectId }) {
         {document.lastOpened ? formatRelativeTime(document.lastOpened) : "—"}
       </span>
 
-      <span className="flex w-[24px] shrink-0 items-center justify-center">
-        <Sparkles
-          size={13}
-          className={document.indexed ? "text-gold" : "text-ink-faint"}
-        />
-      </span>
+
 
       <button
         type="button"

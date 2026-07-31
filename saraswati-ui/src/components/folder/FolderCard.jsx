@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Star } from "lucide-react";
 import FolderIcon from "./FolderIcon";
-import { formatFileCount, formatRelativeTime } from "../../lib/formatters";
+import { formatFileCount, formatRelativeTime, formatFileSize } from "../../lib/formatters";
 
-function FolderCard({ folder }) {
+function FolderCard({ folder, onContextMenu }) {
   return (
     <Link
       to={`/subjects/${folder.id}`}
@@ -13,7 +13,14 @@ function FolderCard({ folder }) {
         <FolderIcon color={folder.color} />
         <button
           type="button"
-          onClick={(event) => event.stopPropagation()}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            if (onContextMenu) {
+              const rect = event.currentTarget.getBoundingClientRect();
+              onContextMenu(folder.id, rect.left, rect.bottom + 8);
+            }
+          }}
           className="rounded-md p-1 text-ink-soft transition-colors hover:bg-surface-hover hover:text-ink"
           aria-label="Folder options"
         >
@@ -22,9 +29,15 @@ function FolderCard({ folder }) {
       </div>
 
       <div className="min-w-0">
-        <p className="truncate text-[14.5px] font-medium text-ink">{folder.title}</p>
+        <div className="flex items-center gap-2">
+          <p className="truncate text-[14.5px] font-medium text-ink">{folder.title}</p>
+          {folder.isFavorite && (
+            <Star size={13} className="shrink-0 text-gold" fill="currentColor" />
+          )}
+        </div>
         <p className="mt-1 truncate text-[12.5px] text-ink-soft">
           {formatFileCount(folder.fileCount)}{" "}
+          <span className="mx-1.5 text-ink-faint">•</span> {formatFileSize(folder.storageUsed)}{" "}
           <span className="mx-1.5 text-ink-faint">•</span> {formatRelativeTime(folder.updatedAt)}
         </p>
       </div>

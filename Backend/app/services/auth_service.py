@@ -3,12 +3,13 @@ Auth service — password hashing and user creation.
 """
 
 from sqlalchemy.orm import Session
-from passlib.context import CryptContext
+from pwdlib import PasswordHash
+from pwdlib.hashers.bcrypt import BcryptHasher
 
 from app.models.user import User
 from app.schemas.auth import RegisterRequest
 
-_pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
+_pwd_ctx = PasswordHash((BcryptHasher(),))
 
 
 def hash_password(plain: str) -> str:

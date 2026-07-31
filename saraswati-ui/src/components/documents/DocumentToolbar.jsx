@@ -112,25 +112,8 @@ function DocumentToolbar({ totalCount, filteredCount }) {
         </button>
       </div>
 
-      {/* Bottom row: filter pills + count */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          {FILTERS.map((f) => (
-            <button
-              key={f.key}
-              type="button"
-              onClick={() => setFilter(f.key)}
-              className={`rounded-lg px-3 py-1.5 text-[12px] font-medium transition-colors ${
-                activeFilter === f.key
-                  ? "bg-gold/12 text-gold border border-gold/25"
-                  : "text-ink-faint border border-transparent hover:text-ink-soft hover:bg-surface-hover"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
-
+      {/* Bottom row: count */}
+      <div className="flex items-center justify-end">
         <span className="text-[12px] text-ink-faint">
           {filteredCount === totalCount
             ? `${totalCount} ${totalCount === 1 ? "document" : "documents"}`

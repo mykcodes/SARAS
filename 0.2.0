@@ -1,0 +1,2 @@
+Requirement already satisfied: pwdlib[bcrypt] in C:\Users\ffmay\AppData\Local\Programs\Python\Python311\Lib\site-packages (0.3.0)
+Requirement already satisfied: bcrypt<6,>=4.1.2 in C:\Users\ffmay\AppData\Local\Programs\Python\Python311\Lib\site-packages (from pwdlib[bcrypt]) (5.0.0)
