@@ -1,0 +1,35 @@
+# Saraswati Backend — Python dependencies
+# Install with: pip install -r requirements.txt
+
+# ── Web Framework ──────────────────────────────────────────────────────────────
+fastapi>=0.111.0
+uvicorn[standard]>=0.29.0
+python-multipart>=0.0.9       # for file uploads
+
+# ── Database ───────────────────────────────────────────────────────────────────
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.9        # PostgreSQL driver
+alembic>=1.13.0               # migrations
+
+# ── Auth ───────────────────────────────────────────────────────────────────────
+python-jose[cryptography]>=3.3.0   # JWT
+passlib[bcrypt]>=1.7.4             # password hashing
+
+# ── AI / LLM ───────────────────────────────────────────────────────────────────
+mistralai>=1.0.0
+langchain>=0.2.0
+langchain-core>=0.2.0
+langchain-mistralai>=0.1.0
+langchain-text-splitters>=0.2.0
+
+# ── Vector Store ───────────────────────────────────────────────────────────────
+chromadb>=0.5.0
+
+# ── PDF / OCR ──────────────────────────────────────────────────────────────────
+pypdf>=4.0.0
+
+# ── Utilities ──────────────────────────────────────────────────────────────────
+pydantic>=2.7.0
+pydantic-settings>=2.2.0
+python-dotenv>=1.0.0
+aiofiles>=23.0.0
