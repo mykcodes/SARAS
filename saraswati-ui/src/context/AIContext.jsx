@@ -79,8 +79,9 @@ const AIContext = createContext(null);
 export function AIProvider({ document, subjectId, children }) {
   const [state, dispatch] = useReducer(aiReducer, initialState);
 
+  // updated to take an optional requestedMarks parameter
   const sendUserMessage = useCallback(
-    async (text) => {
+    async (text, requestedMarks = null) => {
       dispatch({ type: "SEND_MESSAGE", text });
 
       try {
