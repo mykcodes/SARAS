@@ -7,8 +7,8 @@ import api from './client';
  * @param {number|null} chatId
  * @returns {{ chat_id, user_message, ai_message }}
  */
-export function askQuestion(subjectId, question, chatId = null) {
-  return api.post(`/api/subjects/${subjectId}/chat/ask`, { question, chat_id: chatId });
+export function askQuestion(subjectId, question, chatId = null, documentId = null) {
+  return api.post(`/api/subjects/${subjectId}/chat/ask`, { question, chat_id: chatId, document_id: documentId });
 }
 
 /**

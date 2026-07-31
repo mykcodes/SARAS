@@ -27,6 +27,7 @@ def create_subject(db: Session, user_id: int, data: SubjectCreate) -> Subject:
         user_id=user_id,
         name=data.name,
         description=data.description,
+        color=data.color,
     )
     db.add(subject)
     db.commit()
@@ -39,6 +40,8 @@ def update_subject(db: Session, subject: Subject, data: SubjectUpdate) -> Subjec
         subject.name = data.name
     if data.description is not None:
         subject.description = data.description
+    if data.color is not None:
+        subject.color = data.color
     subject.updated_at = datetime.now(timezone.utc)
     db.commit()
     db.refresh(subject)

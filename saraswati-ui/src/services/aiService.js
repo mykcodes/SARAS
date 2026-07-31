@@ -1,43 +1,35 @@
-/**
- * AI Service — mock implementation.
- *
- * Simulates AI responses with realistic delays. Each function returns a
- * Promise so the call-site is already async-ready for a real API swap.
- */
-import { AI_RESPONSE_TEMPLATES } from "../lib/data";
+import { askQuestion, getChatHistory, getChatMessages } from "../api/chatApi";
 
-const MOCK_DELAY_MS = 1500;
+let _activeChatId = null;
 
-/**
- * Sends a user message and returns a mock AI response.
- * Matches message keywords to template categories; defaults to "general".
- */
-export async function sendMessage(message, _context) {
-  await delay(MOCK_DELAY_MS + Math.random() * 1000);
+export async function sendMessage(message, context) {
+  const subjectId = context?.subjectId;
+  if (!subjectId) {
+    return {
+      id: `msg-ai-${Date.now()}`,
+      role: "assistant",
+      text: "Please select a subject before asking questions.",
+      citations: [],
+      timestamp: new Date().toISOString(),
+    };
+  }
 
-  const lower = message.toLowerCase();
-  let templateKey = "general";
+  const documentId = context?.mode === "document" ? context?.documentId : null;
+  const data = await askQuestion(subjectId, message, _activeChatId, documentId);
 
-  if (lower.includes("summar")) templateKey = "summarize";
-  else if (lower.includes("flashcard")) templateKey = "flashcards";
-  else if (lower.includes("quiz")) templateKey = "quiz";
-  else if (lower.includes("explain") || lower.includes("difficult") || lower.includes("concept"))
-    templateKey = "explain";
+  _activeChatId = data.chat_id;
 
-  const template = AI_RESPONSE_TEMPLATES[templateKey];
-
+  const aiMsg = data.ai_message;
   return {
-    id: `msg-ai-${Date.now()}`,
+    id: `msg-ai-${aiMsg.id}`,
     role: "assistant",
-    text: template.text,
-    citations: template.citations,
-    timestamp: new Date().toISOString(),
+    text: aiMsg.content,
+    citations: aiMsg.citations || [],
+    timestamp: aiMsg.timestamp || aiMsg.created_at,
+    _chatId: data.chat_id,
   };
 }
 
-/**
- * Returns context-aware prompt suggestions.
- */
 export function getSuggestedPrompts(_context) {
   return [
     "Summarize the key concepts",
@@ -49,36 +41,31 @@ export function getSuggestedPrompts(_context) {
   ];
 }
 
-/**
- * Returns a mock AI response for a quick action.
- */
-export async function executeQuickAction(actionId) {
-  await delay(MOCK_DELAY_MS + Math.random() * 800);
-
-  const templateMap = {
-    summarize: "summarize",
-    flashcards: "flashcards",
-    quiz: "quiz",
-    explain: "explain",
-    topics: "general",
-    compare: "general",
-    mindmap: "general",
-    formulae: "general",
-    definitions: "general",
+export async function executeQuickAction(actionId, context) {
+  const promptMap = {
+    summarize: "Summarize the key concepts from the uploaded documents",
+    flashcards: "Generate flashcards from the uploaded documents",
+    quiz: "Create a practice quiz based on the uploaded documents",
+    explain: "Explain the most difficult concepts from the uploaded documents",
+    topics: "List the most important topics covered in the uploaded documents",
+    compare: "Compare and contrast the main ideas in the uploaded documents",
+    mindmap: "Create a text-based mind map of the key topics from the uploaded documents",
+    formulae: "Extract all formulas and equations from the uploaded documents",
+    definitions: "Extract all key definitions from the uploaded documents",
   };
 
-  const templateKey = templateMap[actionId] ?? "general";
-  const template = AI_RESPONSE_TEMPLATES[templateKey];
-
-  return {
-    id: `msg-ai-${Date.now()}`,
-    role: "assistant",
-    text: template.text,
-    citations: template.citations,
-    timestamp: new Date().toISOString(),
-  };
+  const prompt = promptMap[actionId] || "Summarize the uploaded documents";
+  return sendMessage(prompt, context);
 }
 
-function delay(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+export function setActiveChatId(chatId) {
+  _activeChatId = chatId;
+}
+
+export function getActiveChatId() {
+  return _activeChatId;
+}
+
+export function resetConversation() {
+  _activeChatId = null;
 }

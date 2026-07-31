@@ -31,7 +31,7 @@ export function globalSearch(query) {
   const conversations = getConversations().filter(
     (c) =>
       c.title.toLowerCase().includes(q) ||
-      c.lastMessage.toLowerCase().includes(q)
+      (c.lastMessage || "").toLowerCase().includes(q)
   ).map((c) => ({ ...c, resultType: "conversation" }));
 
   const bookmarks = getAllBookmarks().filter(

@@ -1,10 +1,10 @@
 import { useState, useCallback, useRef } from "react";
 import { useWorkspace } from "../context/WorkspaceContext";
 import { resolveFileType, MAX_FILE_SIZE, generateId } from "../lib/utils";
-import { uploadDocument } from "../services/documentService";
+import { uploadDocument } from "../api/documentApi";
 
 function useUpload() {
-  const { documents, subjectId } = useWorkspace();
+  const { documents, subjectId, addDocument } = useWorkspace();
   const [queue, setQueue] = useState([]);
   const intervalsRef = useRef({});
 
@@ -25,57 +25,51 @@ function useUpload() {
     [documents]
   );
 
-  // --- Simulate a single upload ---
+  // --- Upload a single file via real API ---
   const simulateOne = useCallback(
     (item) => {
-      const duration = 1500 + Math.random() * 2000; // 1.5-3.5s
-      const tick = 80;
-      const increment = (tick / duration) * 100;
+      if (!subjectId) {
+        setQueue((prev) =>
+          prev.map((q) => (q.id === item.id ? { ...q, status: "error", error: "No subject selected" } : q))
+        );
+        return;
+      }
 
-      const interval = setInterval(() => {
-        setQueue((prev) => {
-          const target = prev.find((q) => q.id === item.id);
-          if (!target || target.status !== "uploading") {
-            clearInterval(interval);
-            return prev;
-          }
-
-          const next = Math.min(target.progress + increment, 100);
-          if (next >= 100) {
-            clearInterval(interval);
-
-            // Simulate ~10% failure rate
-            const failed = Math.random() < 0.1;
-            if (failed) {
-              return prev.map((q) =>
-                q.id === item.id ? { ...q, progress: 100, status: "error", error: "Upload failed — try again" } : q
-              );
-            }
-
-            // Success — add document to workspace via service
-            if (subjectId) {
-              uploadDocument(subjectId, {
-                title: item.fileName.replace(/\.[^.]+$/, ""),
-                type: item.fileType,
-                size: item.file.size,
-                pages: Math.floor(Math.random() * 40) + 5,
-              });
-            }
-
-            return prev.map((q) =>
-              q.id === item.id ? { ...q, progress: 100, status: "success" } : q
-            );
-          }
-
-          return prev.map((q) =>
-            q.id === item.id ? { ...q, progress: next } : q
+      uploadDocument(subjectId, item.file, (progress) => {
+        setQueue((prev) =>
+          prev.map((q) => (q.id === item.id ? { ...q, progress } : q))
+        );
+      })
+        .then((doc) => {
+          setQueue((prev) =>
+            prev.map((q) => (q.id === item.id ? { ...q, progress: 100, status: "success" } : q))
+          );
+          
+          // Format backend response for the workspace state
+          const newDoc = {
+            id: doc.id,
+            subjectId: doc.subject_id,
+            title: doc.title,
+            original_filename: doc.original_filename,
+            type: "pdf",
+            size: doc.file_size || 0,
+            pages: doc.page_count ?? null,
+            uploadedAt: doc.upload_date,
+            processingStatus: doc.processing_status,
+            embeddingStatus: doc.processing_status,
+            favorite: false,
+          };
+          
+          // Add to workspace context
+          addDocument(newDoc);
+        })
+        .catch((err) => {
+          setQueue((prev) =>
+            prev.map((q) => (q.id === item.id ? { ...q, status: "error", error: err.message || "Upload failed" } : q))
           );
         });
-      }, tick);
-
-      intervalsRef.current[item.id] = interval;
     },
-    [subjectId]
+    [subjectId, addDocument]
   );
 
   // --- Public: add files to queue and start uploading ---

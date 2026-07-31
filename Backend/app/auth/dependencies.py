@@ -38,6 +38,7 @@ def get_current_user(
 
     user = db.get(User, user_id)
     if user is None:
+        print(f"AUTHENTICATION FAILED: Token decoded successfully (user_id={user_id}), but db.get(User, {user_id}) returned None. User does not exist in DB.")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",

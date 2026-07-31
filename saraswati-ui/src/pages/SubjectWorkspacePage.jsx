@@ -107,7 +107,18 @@ function WorkspaceContent({ subject }) {
 
 function SubjectWorkspacePage() {
   const { subjectId } = useParams();
-  const { subject, notFound } = useSubject(subjectId);
+  const { subject, isLoading, notFound } = useSubject(subjectId);
+
+  if (isLoading) {
+    return (
+      <div className="relative flex flex-1 flex-col">
+        <Navbar title="Loading..." />
+        <div className="flex flex-1 items-center justify-center">
+          <div className="text-sm text-ink-faint">Loading subject...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex flex-1 flex-col">
