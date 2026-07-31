@@ -67,19 +67,24 @@ def search_chunks(
     user_id: int,
     subject_id: int,
     top_k: int | None = None,
+    document_id: int | None = None,
 ) -> list[dict]:
     """
-    Semantic search filtered to user_id + subject_id.
+    Semantic search filtered to user_id + subject_id (and optionally document_id).
     Returns list of dicts with keys: text, document_id, document_name, chunk_index, distance.
     """
     collection = _get_collection()
     k = top_k or settings.TOP_K_CHUNKS
     query_embedding = embed_query(query)
 
+    filter_conditions = [{"user_id": user_id}, {"subject_id": subject_id}]
+    if document_id is not None:
+        filter_conditions.append({"document_id": document_id})
+
     results = collection.query(
         query_embeddings=[query_embedding],
         n_results=k,
-        where={"$and": [{"user_id": user_id}, {"subject_id": subject_id}]},
+        where={"$and": filter_conditions},
         include=["documents", "metadatas", "distances"],
     )
 

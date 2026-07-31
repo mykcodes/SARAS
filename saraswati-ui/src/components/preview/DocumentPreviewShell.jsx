@@ -4,9 +4,10 @@ import PreviewToolbar from "./PreviewToolbar";
 import AIPanel from "../ai/AIPanel";
 import { AIProvider } from "../../context/AIContext";
 import PDFViewer from "../pdf/PDFViewer";
+import { getDocumentFileUrl } from "../../api/documentApi";
 
 function DocumentPreviewShell({ document, subjectId }) {
-  const fileSource = "/thermo.pdf"
+  const fileSource = getDocumentFileUrl(subjectId, document.id);
 
   const [isAIPanelCollapsed, setIsAIPanelCollapsed] = useState(() => {
     return localStorage.getItem("documentAIPanelCollapsed") === "true";

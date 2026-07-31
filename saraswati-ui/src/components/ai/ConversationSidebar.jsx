@@ -1,8 +1,8 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { X, Search, Plus } from "lucide-react";
 import ConversationItem from "./ConversationItem";
 import { useAI } from "../../context/AIContext";
-import { getConversations, pinConversation, unpinConversation } from "../../services/conversationService";
+import { fetchConversations, pinConversation, unpinConversation } from "../../services/conversationService";
 
 /**
  * Collapsible conversation history sidebar within the AI panel.
@@ -20,15 +20,21 @@ function ConversationSidebar() {
 
   const [search, setSearch] = useState("");
   const [, forceUpdate] = useState(0);
+  const [allConversations, setAllConversations] = useState([]);
+
+  useEffect(() => {
+    if (conversationSidebarOpen && subjectId) {
+      fetchConversations(subjectId).then(setAllConversations);
+    }
+  }, [conversationSidebarOpen, subjectId]);
 
   const conversations = useMemo(() => {
-    const all = getConversations(subjectId);
-    if (!search.trim()) return all;
+    if (!search.trim()) return allConversations;
     const q = search.toLowerCase();
-    return all.filter(
-      (c) => c.title.toLowerCase().includes(q) || c.lastMessage.toLowerCase().includes(q)
+    return allConversations.filter(
+      (c) => c.title.toLowerCase().includes(q) || (c.lastMessage || "").toLowerCase().includes(q)
     );
-  }, [subjectId, search]);
+  }, [allConversations, search]);
 
   const pinned = conversations.filter((c) => c.pinned);
   const unpinned = conversations.filter((c) => !c.pinned);

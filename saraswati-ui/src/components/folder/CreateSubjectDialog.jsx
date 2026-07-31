@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { X, Check } from "lucide-react";
 import useSubjects from "../../hooks/useSubjects";
 
@@ -12,6 +13,7 @@ const COLOR_OPTIONS = [
 ];
 
 function CreateSubjectDialog({ isOpen, onClose }) {
+  const navigate = useNavigate();
   const { createSubject } = useSubjects();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -38,15 +40,18 @@ function CreateSubjectDialog({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim()) {
       setError("Subject name is required.");
       return;
     }
     try {
-      createSubject({ title: title.trim(), description: description.trim(), color });
+      const newSubject = await createSubject({ title: title.trim(), description: description.trim(), color });
       onClose();
+      if (newSubject && newSubject.id) {
+        navigate(`/subjects/${newSubject.id}`);
+      }
     } catch (err) {
       setError(err.message);
     }

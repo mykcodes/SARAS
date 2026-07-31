@@ -1,22 +1,41 @@
-import { getSubjectById } from "../lib/data";
+import { useState, useEffect } from "react";
+import { getSubject } from "../api/subjectApi";
 
 /**
  * Data-access hook for a single subject.
- *
- * Same shape convention as useSubjects: { subject, isLoading, error }, plus
- * a `notFound` flag so pages can render a 404-style state without needing
- * to know how "not found" is represented by the underlying data source.
- * Swapping this for a real fetch (e.g. GET /api/subjects/:id) later only
- * requires changing this file.
  */
 function useSubject(subjectId) {
-  const subject = getSubjectById(subjectId);
+  const [subject, setSubject] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!subjectId) {
+      setSubject(null);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    getSubject(subjectId)
+      .then((data) => {
+        setSubject(data);
+        setError(null);
+      })
+      .catch((err) => {
+        setError(err);
+        setSubject(null);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [subjectId]);
 
   return {
-    subject: subject ?? null,
-    isLoading: false,
-    error: null,
-    notFound: !subject,
+    subject,
+    isLoading,
+    error,
+    notFound: !isLoading && !subject,
   };
 }
 

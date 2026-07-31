@@ -60,7 +60,7 @@ async def ask_question(
     history = get_recent_messages(db, chat.id, limit=6)
 
     # Call RAG pipeline
-    result: AskResult = await ask(body.question, current_user.id, subject_id, history)
+    result: AskResult = await ask(body.question, current_user.id, subject_id, history, body.document_id)
 
     # Persist messages
     user_msg = save_message(db, chat.id, "user", body.question)

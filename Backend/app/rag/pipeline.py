@@ -121,6 +121,7 @@ async def ask(
     user_id: int,
     subject_id: int,
     chat_history: list,  # list of Message ORM objects
+    document_id: int | None = None,
 ) -> AskResult:
     """
     Full RAG pipeline:
@@ -130,7 +131,7 @@ async def ask(
       4. Parse citations from response
     """
     # 1. Retrieve
-    chunks = search_chunks(question, user_id, subject_id)
+    chunks = search_chunks(question, user_id, subject_id, document_id=document_id)
 
     if not chunks:
         return AskResult(

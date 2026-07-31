@@ -24,6 +24,7 @@ class CitationOut(BaseModel):
 class AskRequest(BaseModel):
     question: str = Field(..., min_length=1, max_length=2000)
     chat_id: int | None = None
+    document_id: int | None = None
 
 
 # -- Responses ----------------------------------------------------------------

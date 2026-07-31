@@ -15,9 +15,11 @@ from pydantic import BaseModel, EmailStr, Field, computed_field
 # -- Requests -----------------------------------------------------------------
 
 class RegisterRequest(BaseModel):
-    full_name: str = Field(..., min_length=2, max_length=255, examples=["Mayank Kumar"])
+    full_name: str = Field(..., min_length=2, max_length=255, validation_alias="name", examples=["Mayank Kumar"])
     email: EmailStr
     password: str = Field(..., min_length=6, max_length=128)
+
+    model_config = {"populate_by_name": True}
 
 
 class LoginRequest(BaseModel):

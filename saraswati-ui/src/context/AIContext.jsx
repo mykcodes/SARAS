@@ -1,23 +1,16 @@
 import { createContext, useContext, useReducer, useCallback, useMemo } from "react";
-import { sendMessage as aiSendMessage } from "../services/aiService";
-
-// ---------------------------------------------------------------------------
-// State shape
-// ---------------------------------------------------------------------------
+import { sendMessage as aiSendMessage, resetConversation, setActiveChatId } from "../services/aiService";
+import { getChatMessages } from "../api/chatApi";
 
 const initialState = {
   messages: [],
-  contextMode: "document",  // "subject" | "document" | "pages" | "highlighted" | "multi"
+  contextMode: "document",
   isThinking: false,
   conversationSidebarOpen: false,
   activeConversationId: null,
-  activeTab: "ai",           // "ai" | "notes" | "bookmarks"
-  isPanelOpen: false,        // global slide-over panel visibility
+  activeTab: "ai",
+  isPanelOpen: false,
 };
-
-// ---------------------------------------------------------------------------
-// Reducer
-// ---------------------------------------------------------------------------
 
 function aiReducer(state, action) {
   switch (action.type) {
@@ -41,6 +34,7 @@ function aiReducer(state, action) {
         ...state,
         messages: [...state.messages, action.message],
         isThinking: false,
+        activeConversationId: action.chatId ?? state.activeConversationId,
       };
 
     case "SET_THINKING":
@@ -56,7 +50,7 @@ function aiReducer(state, action) {
       return {
         ...state,
         activeConversationId: action.id,
-        messages: [],
+        messages: action.messages || [],
         isThinking: false,
       };
 
@@ -80,10 +74,6 @@ function aiReducer(state, action) {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Context
-// ---------------------------------------------------------------------------
-
 const AIContext = createContext(null);
 
 export function AIProvider({ document, subjectId, children }) {
@@ -99,7 +89,7 @@ export function AIProvider({ document, subjectId, children }) {
           documentId: document?.id,
           subjectId,
         });
-        dispatch({ type: "RECEIVE_RESPONSE", message: response });
+        dispatch({ type: "RECEIVE_RESPONSE", message: response, chatId: response._chatId });
       } catch {
         dispatch({ type: "SET_THINKING", value: false });
       }
@@ -112,13 +102,28 @@ export function AIProvider({ document, subjectId, children }) {
     []
   );
 
-  const newConversation = useCallback(
-    () => dispatch({ type: "NEW_CONVERSATION" }),
-    []
-  );
+  const newConversation = useCallback(() => {
+    resetConversation();
+    dispatch({ type: "NEW_CONVERSATION" });
+  }, []);
 
   const loadConversation = useCallback(
-    (id) => dispatch({ type: "LOAD_CONVERSATION", id }),
+    async (id) => {
+      setActiveChatId(id);
+      try {
+        const msgs = await getChatMessages(id);
+        const mapped = msgs.map((m) => ({
+          id: `msg-${m.sender}-${m.id}`,
+          role: m.sender === "user" ? "user" : "assistant",
+          text: m.content,
+          citations: m.citations || [],
+          timestamp: m.timestamp || m.created_at,
+        }));
+        dispatch({ type: "LOAD_CONVERSATION", id, messages: mapped });
+      } catch {
+        dispatch({ type: "LOAD_CONVERSATION", id, messages: [] });
+      }
+    },
     []
   );
 
@@ -183,3 +188,4 @@ export function useAI() {
 }
 
 export default AIContext;
+

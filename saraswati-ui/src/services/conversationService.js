@@ -1,29 +1,39 @@
-/**
- * Conversation Service — mock implementation.
- *
- * Manages conversation history with in-memory state.
- * When a real backend is available, replace internals with API calls.
- */
-import { getConversationsBySubjectId as getFromData } from "../lib/data";
+import { getChatHistory, deleteChat } from "../api/chatApi";
 
-let conversations = null;
+let _cachedConversations = [];
+let _lastSubjectId = null;
 
-function init() {
-  if (!conversations) {
-    conversations = getFromData().map((c) => ({ ...c }));
+export async function fetchConversations(subjectId) {
+  if (!subjectId) return [];
+  try {
+    const chats = await getChatHistory(subjectId);
+    _cachedConversations = chats.map((c) => ({
+      id: c.id,
+      subjectId: c.subject_id,
+      title: c.title || "Untitled conversation",
+      lastMessage: c.last_message || "",
+      createdAt: c.created_at,
+      pinned: false,
+      subjectTitle: "",
+    }));
+    _lastSubjectId = subjectId;
+    return _cachedConversations;
+  } catch {
+    return [];
   }
 }
 
 export function getConversations(subjectId) {
-  init();
-  if (!subjectId) return [...conversations];
-  return conversations.filter((c) => c.subjectId === subjectId);
+  if (subjectId && subjectId !== _lastSubjectId) {
+    fetchConversations(subjectId);
+  }
+  if (!subjectId) return [..._cachedConversations];
+  return _cachedConversations.filter((c) => c.subjectId === subjectId);
 }
 
 export function searchConversations(query) {
-  init();
   const q = query.toLowerCase();
-  return conversations.filter(
+  return _cachedConversations.filter(
     (c) =>
       c.title.toLowerCase().includes(q) ||
       c.lastMessage.toLowerCase().includes(q)
@@ -31,20 +41,17 @@ export function searchConversations(query) {
 }
 
 export function pinConversation(id) {
-  init();
-  const conv = conversations.find((c) => c.id === id);
+  const conv = _cachedConversations.find((c) => c.id === id);
   if (conv) conv.pinned = true;
   return conv ?? null;
 }
 
 export function unpinConversation(id) {
-  init();
-  const conv = conversations.find((c) => c.id === id);
+  const conv = _cachedConversations.find((c) => c.id === id);
   if (conv) conv.pinned = false;
   return conv ?? null;
 }
 
 export function getConversationById(id) {
-  init();
-  return conversations.find((c) => c.id === id) ?? null;
+  return _cachedConversations.find((c) => c.id === id) ?? null;
 }
