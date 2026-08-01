@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     # -- JWT -------------------------------------------------------------------
     JWT_SECRET: str = "change-me-in-production-32-chars-min"
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
+    ACCESS_TOKEN_EXPIRE_MINUTES: int =  525600  # 1 year
 
     # -- Mistral ---------------------------------------------------------------
     MISTRAL_API_KEY: str = ""
