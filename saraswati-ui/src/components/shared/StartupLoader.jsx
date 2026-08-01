@@ -60,6 +60,6 @@ function StartupLoader({ onComplete }) {
       </div>
     </div>
   );
-}
+} ;
 
 export default StartupLoader;
