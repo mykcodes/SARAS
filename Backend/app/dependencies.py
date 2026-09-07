@@ -12,8 +12,8 @@ def get_current_user(db: Session = Depends(get_db)) -> User:
     if not user:
         user = User(
             email="local@saraswati.app",
-            name="Saraswati User",
-            hashed_password="not_used"
+            full_name="Saraswati User",
+            password_hash="not_used"
         )
         db.add(user)
         db.commit()

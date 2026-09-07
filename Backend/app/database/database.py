@@ -19,12 +19,20 @@ logger = logging.getLogger(__name__)
 # Engine
 # ---------------------------------------------------------------------------
 
+engine_kwargs = {
+    "pool_pre_ping": True,
+    "echo": False,
+}
+
+if settings.DATABASE_URL.startswith("sqlite"):
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
+else:
+    engine_kwargs["pool_size"] = 10
+    engine_kwargs["max_overflow"] = 20
+
 engine = create_engine(
     settings.DATABASE_URL,
-    pool_pre_ping=True,       # test connections before using them
-    pool_size=10,
-    max_overflow=20,
-    echo=False,               # set True for SQL debug logging
+    **engine_kwargs
 )
 
 # ---------------------------------------------------------------------------
